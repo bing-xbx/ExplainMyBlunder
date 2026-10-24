@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Subscribe · Blunder Explainer</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="pay-page">
+  <!-- Paddle's checkout opens here: the "default payment link" in Paddle points at /pay, and the
+       service's checkout link adds ?_ptxn=<transaction>. Loaded without cross-origin isolation
+       (web/_headers), because Paddle's checkout runs in a frame from Paddle's own site. -->
+  <main>
+    <h1>Blunder Explainer</h1>
+    <p id="pay-status" class="muted">Opening the checkout…</p>
+    <p><a href="/">Back to the app</a></p>
+  </main>
+  <script type="module" src="/pay.js"></script>
+</body>
+</html>

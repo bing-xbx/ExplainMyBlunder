@@ -1,0 +1,22 @@
+# Cloudflare Pages response headers (the PC server ignores this file).
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex
+  # Only the directives that restrict nothing the app loads: no framing of these pages, no plugins,
+  # no <base> rewrites. A full script/connect policy waits for an inventory (security review 2026-10-23).
+  Content-Security-Policy: frame-ancestors 'none'; object-src 'none'; base-uri 'none'
+  # Cross-origin isolation: lets the engine use several threads (SharedArrayBuffer).
+  # The page loads nothing from other sites; the Lichess download is a CORS fetch, which still works.
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+/sw.js
+  Cache-Control: no-cache
+# The checkout page runs Paddle's checkout in a frame from Paddle's site, which isolation would block;
+# it needs no engine threads, so it drops both isolation headers.
+/pay
+  ! Cross-Origin-Opener-Policy
+  ! Cross-Origin-Embedder-Policy
+/pay.html
+  ! Cross-Origin-Opener-Policy
+  ! Cross-Origin-Embedder-Policy

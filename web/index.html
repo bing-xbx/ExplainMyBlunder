@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Blunder Explainer</title>
+  <link rel="icon" href="/icon-192.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Blunders">
+  <meta name="theme-color" content="#262421">
+  <link rel="stylesheet" href="/vendor/chessground/chessground.base.css">
+  <link rel="stylesheet" href="/vendor/chessground/chessground.brown.css">
+  <link rel="stylesheet" href="/vendor/chessground/chessground.cburnett.css">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <button id="update" hidden title="A new version of the app is downloaded; tap to switch to it">New version: tap to reload</button>
+  <header>
+    <h1>Blunder Explainer</h1>
+    <div id="loader">
+      <textarea id="input" spellcheck="false" placeholder="Paste a game link (Lichess or chess.com) or a PGN, and press Review to find and explain the blunders. A position (FEN) opens to explore."></textarea>
+      <div class="loader-buttons">
+        <button id="review" title="A game: find and explain its blunders. A position: show it on the board">Review</button>
+        <button id="load" class="link-btn" title="Show the pasted game on the board without reviewing it">or just show it</button>
+        <div id="mygames-wrap">
+          <button id="sync" class="secondary" aria-expanded="false" title="All your games: your recent Lichess and chess.com games to review or open, and your other reviews">My games ▾</button>
+          <div id="mygames" hidden>
+            <div class="mg-head"><b>Your games</b> <button id="mygames-refresh" class="link-btn" title="Fetch your newest games again">Refresh</button></div>
+            <div id="mygames-list"></div>
+            <div class="mg-foot">
+              <button id="mygames-newest" class="link-btn">Select the 5 newest not yet reviewed</button>
+              <button id="mygames-review" disabled>Review selected</button>
+            </div>
+            <p class="muted mg-note">Your games and reviews are saved on this device only.</p>
+          </div>
+        </div>
+        <div id="settings-wrap">
+          <button id="settings-btn" class="secondary" aria-expanded="false" title="Settings">⚙ Settings</button>
+          <div id="settings" hidden>
+            <section class="set-sec">
+              <h3>Your accounts</h3>
+              <p class="muted acc-help">Your username on <b>Lichess or chess.com</b>: one is enough, both if you play on both. My games lists your newest games there.</p>
+              <label class="acc-row"><span class="site-tag lichess">Lichess</span>
+                <input id="user" placeholder="Lichess username (optional)" spellcheck="false" autocomplete="off"></label>
+              <label class="acc-row"><span class="site-tag chesscom">chess.com</span>
+                <input id="user-cc" placeholder="chess.com username (optional)" spellcheck="false" autocomplete="off"></label>
+            </section>
+            <section class="set-sec">
+              <h3>Reviews</h3>
+              <label class="acc-row" id="inaccuracies-label"><input type="checkbox" id="inaccuracies">
+                <span>Also explain inaccuracies (?!) <span class="muted">Reviews take longer.</span></span></label>
+              <label class="acc-row" id="autosync-label" title="When the app opens: review your newest game on each site, unless it is already reviewed">
+                <input type="checkbox" id="autosync"> Automatically review my newest game when the app opens</label>
+            </section>
+            <section class="set-sec" id="plan-wrap" hidden>
+              <h3>Account and plan</h3>
+              <div id="plan">
+                <div id="plan-out">
+                  <p class="muted acc-help">Sign in for the coach. No password: we email you a code. Your reviews stay on this device.</p>
+                  <label class="acc-row">Email <input id="plan-email" type="email" autocomplete="email" spellcheck="false"></label>
+                  <div class="acc-actions"><button id="plan-send">Send me a code</button></div>
+                  <label class="acc-row" id="plan-code-row" hidden>Code <input id="plan-code" inputmode="numeric" autocomplete="one-time-code"></label>
+                  <div class="acc-actions" id="plan-code-actions" hidden><button id="plan-enter">Sign in</button></div>
+                  <p class="muted acc-help">On iPhone, sign in inside the installed app: it and Safari keep separate sign-ins.</p>
+                </div>
+                <div id="plan-in" hidden>
+                  <p id="plan-who"></p>
+                  <p id="plan-usage" class="muted acc-help"></p>
+                  <div class="acc-actions" id="plan-buy"><button id="plan-monthly">Subscribe monthly</button> <button id="plan-annual" class="secondary">Annual</button></div>
+                  <div class="acc-actions" id="plan-manage-row" hidden><button id="plan-manage" class="secondary">Manage subscription</button></div>
+                  <div class="acc-actions"><button id="plan-signout" class="secondary">Sign out</button> <button id="plan-delete" class="secondary">Delete my account</button></div>
+                </div>
+                <p id="plan-status" class="muted acc-help" role="status"></p>
+              </div>
+            </section>
+            <section class="set-sec">
+              <h3>About</h3>
+              <p class="muted acc-help">Blunder Explainer <span id="about-version"></span>.</p>
+              <p class="set-links"><a id="about-star" target="_blank" rel="noopener" hidden>★ Star it on GitHub</a> <a id="about-source" target="_blank" rel="noopener" hidden>Source code of this version (GPL-3.0)</a></p>
+            </section>
+            <div class="acc-actions"><button id="settings-done">Done</button></div>
+          </div>
+        </div>
+        <span id="progress-wrap"><span id="progress-bar" class="pbar" hidden><span class="pbar-fill"></span></span><span id="progress" class="muted"></span></span>
+        <span id="error" role="alert"></span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div id="evalbar" title="Stockfish evaluation"><div id="evalfill"></div><span id="evaltext"></span></div>
+    <div id="board-col">
+      <div class="player" id="player-top"></div>
+      <div id="context"></div>
+      <div id="board-wrap">
+        <div id="board"></div>
+        <div id="compare" hidden>
+          <figure><div id="cmpA" class="mini"></div><figcaption id="cmpAcap"></figcaption></figure>
+          <figure><div id="cmpB" class="mini"></div><figcaption id="cmpBcap"></figcaption></figure>
+        </div>
+      </div>
+      <div class="player" id="player-bottom"></div>
+      <div id="caption" hidden></div>
+      <div id="strip" aria-label="moves"></div>
+      <div id="nav">
+        <button data-nav="start" title="First move (Home)">⏮</button>
+        <button data-nav="prev" title="Previous move (←)">◀</button>
+        <button data-nav="next" title="Next move (→)">▶</button>
+        <button data-nav="end" title="Last move (End)">⏭</button>
+        <button id="to-game" class="secondary" hidden title="Leave the variation and return to the game">↩ Back to the game</button>
+        <label id="whatif-label" title="Explain every move you drag on the board"><input type="checkbox" id="whatif"> What if: explain my moves</label>
+      </div>
+      <section id="chat" class="sheet-chat collapsed">
+        <button id="chat-toggle" class="sec-toggle" aria-expanded="false">
+          <span class="chev">▸</span> Ask about this position <span id="chat-count" class="muted"></span>
+        </button>
+        <div id="chat-body">
+        <div id="chat-plus" class="plus-card" hidden>
+          <b>Ask the coach</b> <span class="plus-badge">Plus</span>
+          <p>Ask anything about the position on your board, in plain words: why a move loses, what to play instead, each side's plan. The coach checks every move it mentions with the engine. It is part of the paid plan; everything else in this app stays free.</p>
+          <a id="chat-plus-link" class="plus-link" target="_blank" rel="noopener" hidden>See the coach plan</a>
+          <span id="chat-plus-soon" class="muted">Coming soon.</span>
+          <button id="chat-plus-signin" hidden>Sign in</button>
+        </div>
+        <div id="chat-log"></div>
+        <div id="chat-suggest">
+          <button class="secondary chip">Why is this a blunder?</button>
+          <button class="secondary chip">What should I have played, and why?</button>
+          <button class="secondary chip">What is each side's plan here?</button>
+        </div>
+        <div id="chat-row">
+          <textarea id="chat-input" rows="2" placeholder="Ask anything about the board you see (Enter to send, Shift+Enter for a new line)"></textarea>
+          <button id="chat-send">Send</button>
+        </div>
+        <div id="chat-status" class="muted"></div>
+        </div>
+      </section>
+    </div>
+
+    <aside>
+      <nav id="sheet-tabs">
+        <button data-sheet="explain" class="active">Explanation</button>
+        <button data-sheet="engine">Engine</button>
+        <button data-sheet="chat">Chat</button>
+        <button data-sheet="games">Games</button>
+        <button data-sheet="settings">Settings</button>
+      </nav>
+      <section id="explain" class="sheet-explain"></section>
+      <section id="engine" class="sheet-engine">
+        <div class="engine-head">
+          <span id="score">…</span>
+          <span id="depth" class="muted"></span>
+          <span id="engine-name" class="muted">Stockfish</span>
+        </div>
+        <div id="pv" title="Click a move to play the engine line up to it"></div>
+      </section>
+      <section id="games" class="sheet-games"></section>
+      <section id="settings-sheet" class="sheet-settings"></section>
+      <section id="study">
+        <div id="moments" hidden>
+          <button id="moments-toggle" class="sec-toggle" aria-expanded="true"><span class="chev">▾</span> <span id="moments-title"></span></button>
+          <div id="moments-body"></div>
+        </div>
+        <div id="moves"></div>
+      </section>
+      <p class="muted help">← / → step through the moves, Home / End jump to the start or end. Click a move in a variation to enter it; → then follows that variation, and "Back to the game" returns. Drag pieces to try your own moves.</p>
+    </aside>
+  </main>
+
+  <footer id="support" hidden>
+    <span>Like it?</span>
+    <a id="support-star" href="#" target="_blank" rel="noopener" hidden>★ Give us a star on GitHub</a>
+  </footer>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+node_modules/
+web/core.js
+web/sw.js
+web/vendor/stockfish/
+core/build/

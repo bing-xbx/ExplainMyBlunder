@@ -1,0 +1,13 @@
+{
+  "backend": null,
+  "upgrade_url": null,
+  "paddle": {
+    "environment": "sandbox",
+    "client_token": null
+  },
+  "plans": {
+    "monthly": null,
+    "annual": null
+  },
+  "github_url": null
+}

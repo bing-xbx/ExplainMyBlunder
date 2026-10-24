@@ -1,0 +1,24 @@
+// Where a phone review spends its engine searches: judging every move vs building the cards.
+import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
+import { EngineEvaluator, UciEngine, explainMoment, findMoments, load } from '../src';
+const require = createRequire(import.meta.url);
+const sf = require(require.resolve('stockfish/bin/stockfish-19-lite-single.js'))();
+const ls: Array<(l: string) => void> = [];
+sf.listener = (l: string) => ls.forEach((f) => f(l));
+const engine = new UciEngine({ send: (c) => sf.processCommand(c), onLine: (f) => ls.push(f) }, { Hash: 32 });
+let calls = 0;
+const ev = new EngineEvaluator(engine, Number(process.argv[3] || 250000));
+const orig = engine.search.bind(engine);
+engine.search = (...a: any[]) => { calls++; return (orig as any)(...a); };
+const pgn = readFileSync(process.argv[2], 'utf-8');
+const recs = load(pgn).records;
+const moves = recs.slice(1).map((r: any) => r.uci);
+let t = Date.now();
+const { moments } = await findMoments(recs[0].fen, moves, ev);
+const judge = { calls, ms: Date.now() - t };
+calls = 0; t = Date.now();
+const cards = moments.filter((m: any) => m.judgement === 'blunder' || m.judgement === 'mistake');
+for (const m of cards) await explainMoment(recs[0].fen, moves, m, ev);
+console.log(JSON.stringify({ plies: moves.length, judge, cards: { n: cards.length, calls, ms: Date.now() - t } }));
+process.exit(0);

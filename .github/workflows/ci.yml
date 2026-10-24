@@ -1,0 +1,30 @@
+# The app's checks on every push and pull request: unit tests, typecheck, build, and the browser
+# tests (offline updates, the coach card, a short UI monkey run) in the runner's Chrome.
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: core/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run build
+      - run: node test/ui/update.mjs
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+      - run: node test/ui/plus.mjs
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+      - run: node test/ui/monkey.mjs --seed 1 --actions 60 --screens desktop,phone
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
