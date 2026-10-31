@@ -1,5 +1,5 @@
-// A python-chess-shaped wrapper around chessops, so the port of the Python logic
-// reads line for line like the original. Differences it hides:
+// A chessops adapter with UCI move notation and consistent position serialization.
+// Compatibility conventions:
 // - chessops encodes castling as "king takes own rook" (e1h1); here, as in
 //   python-chess and UCI engines, castling is the king's two-square move (e1g1);
 // - FEN/EPD write the en-passant square only when an en-passant capture is legal

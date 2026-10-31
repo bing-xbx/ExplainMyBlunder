@@ -1,5 +1,4 @@
-// Port of blunder/explain.py: the line after your move vs the line after the best move,
-// each played out until the material stops changing.
+// Compare the played move with the best move, following both lines to a quiet position.
 import { Board, Mv, moveFromUci, sq, squareFile, uci } from './board';
 import type { Color } from './board';
 import type { Evaluator } from './engine';

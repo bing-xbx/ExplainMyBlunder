@@ -1,5 +1,4 @@
-// The ExplainMyBlunder core: the Python logic of blunder/, ported to TypeScript so it
-// runs in the browser (and on the phone) with no server.
+// ExplainMyBlunder chess analysis, explanations and browser engine interfaces.
 export * from './board';
 export * from './engine';
 export * from './records';

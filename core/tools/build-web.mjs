@@ -32,7 +32,7 @@ for (const f of FILES) hash.update(f).update(readFileSync(join('../web', f === '
 const version = hash.digest('hex').slice(0, 12);
 // About shows when the app last changed: the last commit touching what the build reads, so a push
 // that changes only docs keeps the same stamp (and the same sw.js: no needless update on phones).
-// release_site.py builds from `git archive` (no history), so it passes APP_COMMIT in.
+// Builds without Git history can supply the version timestamp through APP_COMMIT.
 const APP_PATHS = ['web', 'core/src', 'core/tools', 'core/package.json', 'core/package-lock.json'];
 function built() {
   if (process.env.APP_COMMIT) return JSON.parse(process.env.APP_COMMIT);

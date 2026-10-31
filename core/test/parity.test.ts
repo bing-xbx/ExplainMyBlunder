@@ -1,12 +1,10 @@
-// Parity: the TypeScript core must reproduce the Python output on the same positions,
-// given the same engine answers (recorded by scripts/export_parity_fixtures.py).
-// fixtures-public/ comes from famous games (core/test/public-games/) and is always there;
-// fixtures/ comes from your own reviews and exists only in the closed repo.
+// Regression checks replay recorded engine answers and compare analysis results with fixtures.
+// Famous-game fixtures are included; additional local fixtures are used when available.
 import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { Board, RecordedEvaluator, explainPosition, explainTry, findMoments, moveFromUci, runCoachTool } from '../src';
 
-const SETS = [['public games', 'fixtures-public'], ['your games', 'fixtures']]
+const SETS = [['public games', 'fixtures-public'], ['local fixtures', 'fixtures']]
   .filter(([, dir]) => existsSync(new URL(`./${dir}/cards.json`, import.meta.url)));
 
 /** JSON-normalise: sort the legal-destination lists (move generation order differs). */

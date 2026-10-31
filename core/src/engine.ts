@@ -1,5 +1,4 @@
-// The engine as the core sees it: the same shape as blunder/analyze.py's Evaluator.
-// Scores are from White's point of view; `move` and `pv` are UCI strings.
+// Engine evaluation interfaces: scores from White's point of view and moves in UCI notation.
 import { Board } from './board';
 
 export interface Line {

@@ -1,4 +1,4 @@
-// Port of blunder/analyze.py: judge every move like Lichess does.
+// Judge moves using Lichess-style winning chances and severity thresholds.
 import { Board, moveFromUci } from './board';
 import type { Color } from './board';
 import { Evaluator, Score, score } from './engine';

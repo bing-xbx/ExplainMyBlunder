@@ -1,4 +1,4 @@
-// Port of blunder/detect.py: concrete reasons, found by code (no LLM).
+// Find concrete tactical reasons directly from board positions, without an LLM.
 import { Board, Mv, SquareSet, between, moveFromUci, opposite, parseSq, sq, squareFile, uci } from './board';
 import type { Color, Role, Square } from './board';
 import type { Evaluator } from './engine';

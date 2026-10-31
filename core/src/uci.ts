@@ -1,5 +1,4 @@
-// Stockfish over UCI text messages: the WebAssembly engine in a browser Worker, or the
-// same build in Node for tests. Replaces blunder/engine.py + analyze.Evaluator on the phone.
+// Communicate with Stockfish over UCI in browser Workers and Node-based tests.
 import { Board, moveFromUci } from './board';
 import type { Evaluator, Line } from './engine';
 import { engineKey } from './engine';
@@ -161,7 +160,7 @@ function legalPrefix(board: Board, pv: string[]): string[] {
   return out;
 }
 
-/** Live analysis for the board, the shape blunder/engine.py's analyse() returns. */
+/** Live analysis results for the board. */
 export async function analyse(engine: UciEngine, fen: string, movetimeMs = 700, signal?: AbortSignal) {
   const board = Board.fromFen(fen);
   if (board.isGameOver()) return { fen, gameOver: board.outcomeResult(), best: null, pv: [], pvUci: [] };

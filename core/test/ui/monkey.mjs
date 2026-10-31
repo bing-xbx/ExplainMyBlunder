@@ -15,8 +15,7 @@ import puppeteer from 'puppeteer-core';
 
 const HERE = fileURLToPath(new URL('.', import.meta.url));
 const WEB = join(HERE, '..', '..', '..', 'web');
-// reviews-public.json: famous games (scripts/export_parity_fixtures.py --public), always there;
-// reviews.json: two of your own, only in the closed repo.
+// Included famous-game reviews, plus optional local regression examples when available.
 const REVIEWS = ['reviews-public.json', 'reviews.json'].filter((f) => existsSync(join(HERE, f)))
   .flatMap((f) => JSON.parse(readFileSync(join(HERE, f), 'utf-8')));
 // a short game to paste and review (Légal's mate, a famous public game)

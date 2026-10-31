@@ -1,5 +1,5 @@
-// Port of blunder/reasons.py: what your move allowed, what the best move gives,
-// why that idea disappeared. Built only from detector facts.
+// Explain what the played move allowed, what the best move offered, and why the opportunity disappeared.
+// All explanations are built from detector facts.
 import { Board, Mv, opposite, sq, squareFile, squareRank } from './board';
 import type { Color } from './board';
 import type { Evaluator } from './engine';

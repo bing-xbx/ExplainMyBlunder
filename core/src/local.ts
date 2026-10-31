@@ -1,6 +1,5 @@
-// The phone's "server": every /api route of blunder/server.py, answered inside the page
-// with the TypeScript core, Stockfish compiled to WebAssembly (in Workers) and IndexedDB.
-// Nothing leaves the device except the Lichess game download.
+// Browser API backed by Stockfish WebAssembly, the analysis core and IndexedDB.
+// Game downloads use the Lichess and chess.com public APIs.
 import { InputError, load, play } from './records';
 import { explainTry } from './whatif';
 import { EngineEvaluator, UciEngine, analyse } from './uci';
@@ -13,9 +12,9 @@ const ENGINE_JS = '/vendor/stockfish/stockfish-19-lite-single.js';
 // Several threads need a cross-origin isolated page (COOP/COEP headers, see web/_headers).
 const ENGINE_THREADED_JS = '/vendor/stockfish/stockfish-19-lite.js';
 const threaded = () => typeof crossOriginIsolated !== 'undefined' && crossOriginIsolated && (navigator.hardwareConcurrency || 1) > 2;
-// Lighter than the PC's 1M nodes: a review takes minutes on a phone, not hours.
+// A fixed search budget keeps reviews practical on mobile devices.
 export const REVIEW_NODES = 250_000;
-const WHATIF_NODES = 300_000; // blunder/whatif.py
+const WHATIF_NODES = 300_000; // Interactive move explanations.
 const REVIEW_ID = /^[A-Za-z0-9_-]{1,60}$/;
 const LICHESS_NAME = /^[A-Za-z0-9][A-Za-z0-9_-]{1,29}$/;
 const CHESSCOM_NAME = /^[A-Za-z0-9][A-Za-z0-9_-]{2,24}$/;
@@ -152,7 +151,7 @@ async function loadReview(id: string): Promise<Review> {
   return r;
 }
 
-/** Reviews made on the PC (the "Export for the phone" file, or single data/reviews/*.json). */
+/** Import saved reviews or individual review records. */
 export async function importReviews(items: unknown[]): Promise<{ imported: number; skipped: number }> {
   let imported = 0, skipped = 0;
   for (const r of items as Review[]) {
@@ -356,7 +355,7 @@ async function route(path: string, body: Record<string, any>, signal?: AbortSign
       const cfg = await settings();
       let syncJob: string | null = null;
       for (const [id, j] of jobs) if (j.kind === 'sync' && (j.state === 'queued' || j.state === 'running')) syncJob = id;
-      // Like the PC server at launch: with Auto-load on, sync once when the app opens.
+      // With automatic review enabled, sync once when the app opens.
       if (!syncJob && !autoSynced && cfg.auto_sync && hasName(cfg) && navigator.onLine) syncJob = startSync(cfg);
       autoSynced = true;
       resumeCards();
@@ -425,7 +424,7 @@ async function route(path: string, body: Record<string, any>, signal?: AbortSign
   throw new InputError('not found');
 }
 
-/** Same contract as a POST to the PC server: resolves to the JSON, or throws with its error. */
+/** Handle a browser API request: return its JSON result or throw an error. */
 export async function localApi(path: string, body: Record<string, any> = {}, signal?: AbortSignal): Promise<unknown> {
   return route(path, body, signal);
 }

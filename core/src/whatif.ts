@@ -1,4 +1,4 @@
-// Port of blunder/whatif.py: explain any move you try, in any position.
+// Explain any legal move the player tries in a position.
 import { Board, moveFromUci, sameMove, squareRank, uci } from './board';
 import type { Evaluator } from './engine';
 import { score } from './engine';

@@ -1,5 +1,4 @@
-// Port of blunder/review.py + the PGN bits of fetch.py: a whole game review, the same
-// JSON the PC writes to data/reviews/<id>.json.
+// Parse PGN games and assemble complete game reviews.
 import { parsePgn } from 'chessops/pgn';
 import type { Evaluator, Score } from './engine';
 import { Board, moveFromUci } from './board';

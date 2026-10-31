@@ -1,4 +1,4 @@
-// Port of blunder/annotate.py: detector facts -> per-move captions and board marks.
+// Turn detector facts into per-move captions and board marks.
 import type { Color } from './board';
 import { Facts, truthy } from './detect';
 

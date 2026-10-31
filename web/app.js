@@ -1,11 +1,6 @@
-// Board UI, modelled on the Lichess analysis board. Renders records from the backend;
-// computes no chess facts itself. The backend is the Python server on the PC, or, with no
-// server (the phone, or ?local=1), the same routes answered inside the page by /core.js:
-// the TypeScript core with Stockfish in WebAssembly, storing reviews in IndexedDB.
-//
-// Moves form a tree, like Lichess: the game is the main line; explanations hang off a
-// judged move as a comment plus two variations ("after your move, best play" and
-// "better was"); moves you drag become your own variations.
+// Interactive chess board with game reviews, move explanations and exploratory variations.
+// Analysis is provided by the browser core or a compatible local API.
+// Variations show the continuation after the played move and the suggested alternative.
 import { Chessground } from '/vendor/chessground/chessground.min.js';
 import * as account from '/account.js';
 
@@ -89,7 +84,7 @@ const cg = Chessground($('board'), cgConfig({
 const miniA = Chessground($('cmpA'), cgConfig({ viewOnly: true, coordinates: false }));
 const miniB = Chessground($('cmpB'), cgConfig({ viewOnly: true, coordinates: false }));
 
-const backend = { local: null }; // the in-page backend module, when there is no PC server
+const backend = { local: null }; // the browser analysis module when a local API is unavailable
 // web/config.json: `backend` is the paid service's address (null: none), `upgrade_url` the page
 // that sells the paid plan (null: the coach shows "Coming soon").
 // `github_url`: the "star us on GitHub" link at the bottom and in About (hidden while null).
@@ -117,7 +112,7 @@ async function chooseBackend() {
   $('plan-wrap').hidden = !account.enabled();
   showPlusCard();
   document.body.classList.add('local');
-  // Offline support for the installed app; not on the PC, where it would cache the dev files.
+  // Offline support for the installed app; disabled on localhost during development.
   if ('serviceWorker' in navigator && (!onPc || params.get('sw') === '1')) watchForUpdates();
 }
 
@@ -368,7 +363,7 @@ async function refreshReviews(selectId) {
   } catch (e) { return []; /* the list is a convenience */ }
 }
 
-// ---------- settings and auto-sync (saved in local/config.json on this computer) ----------
+// ---------- saved game accounts and automatic review ----------
 
 let autoOpened = null; // the review opened automatically at start, if the user is still on it
 
@@ -433,7 +428,7 @@ async function startSync() {
 const siteOf = (r) => r.site || (String(r.id).startsWith('chesscom-') ? 'chess.com' : 'Lichess');
 const siteClass = (site) => (site === 'chess.com' ? 'chesscom' : site === 'Lichess' ? 'lichess' : 'pasted');
 
-// Settings: one panel (a popup on the PC, the Settings tab on a phone).
+// Settings: one panel (a desktop popup or the Settings tab on a phone).
 let namesWhenOpened = '';
 function toggleSettings(open = $('settings').hidden) {
   if (phone.matches) {
@@ -470,7 +465,7 @@ async function init() {
   $('autosync').checked = !!cfg.auto_sync;
   state.inaccuracies = !!cfg.explain_inaccuracies;
   $('inaccuracies').checked = state.inaccuracies;
-  $('inaccuracies-label').hidden = !backend.local; // the PC server explains blunders and mistakes only
+  $('inaccuracies-label').hidden = !backend.local; // a compatible local API may only explain blunders and mistakes
   showVersion();
   const reviews = await refreshReviews();
   // On a machine set up for one player, open their latest reviewed game straight away.
@@ -1286,16 +1281,16 @@ function showSupport() {
 }
 
 // The version of the app files (what the service worker installed), for "About", and the GPL source
-// link: the open repo's tag site-<version> holds exactly this version (scripts/release_site.py).
+// link: the repository's site-<version> tag contains the matching application source.
 async function showVersion() {
   try {
     const text = await (await fetch('/sw.js')).text();
     const v = /VERSION = "([^"]+)"/.exec(text)?.[1];
     const b = /const BUILT = (\{[^;\n]*\});/.exec(text);
     const stamp = b ? JSON.parse(b[1]) : null;
-    // the commit time in your own time zone, to the minute, and its id, so you can find the diff
+    // The app update time in your own time zone, to the minute.
     const when = stamp && new Date(stamp.time).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
-    if (v) $('about-version').textContent = stamp ? `version ${when} · commit ${stamp.commit}${stamp.local ? ' + local changes' : ''} (${v})` : `version ${v}`;
+    if (v) $('about-version').textContent = stamp ? `version ${when}${stamp.local ? ' + local changes' : ''} (${v})` : `version ${v}`;
     const repo = typeof appConfig.github_url === 'string' && /^https:\/\//.test(appConfig.github_url) ? appConfig.github_url.replace(/\/+$/, '') : null;
     if (repo && v) {
       $('about-source').href = `${repo}/tree/site-${v}`;

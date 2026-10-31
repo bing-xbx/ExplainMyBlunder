@@ -1,4 +1,4 @@
-// Port of blunder/position.py: positional differences where material ends the same.
+// Compare positional features when both lines end with equal material.
 import { kingAttacks } from 'chessops/attacks';
 import { Board, opposite, parseSq, sq, squareFile, squareRank } from './board';
 import type { Color, Square } from './board';

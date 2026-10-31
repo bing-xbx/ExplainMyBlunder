@@ -1,7 +1,5 @@
-// The coach's four tools, answered on the device: the port of the PC coach's tools
-// (same output shapes, checked by the parity tests). The paid service runs the coach's
-// conversation and asks for these; the app runs them on its own Stockfish and sends
-// the results back, so the coach's numbers are the ones on the board.
+// Run the coach's analysis tools on the device using the same engine and facts as the board.
+// The hosted service requests tools; the app returns the analysis results.
 import { Board, moveFromUci } from './board';
 import type { Color } from './board';
 import { VALUES, hanging, moveFacts, threat } from './detect';
@@ -11,7 +9,7 @@ export const COACH_TOOLS = ['engine_analyse', 'play_moves', 'move_facts', 'threa
 
 const sideName = (c: Color) => (c === 'white' ? 'white' : 'black');
 
-/** An evaluation from the player's side: "+0.35", "mate in 2", "mated in 1" (as on the PC). */
+/** An evaluation from the player's side: "+0.35", "mate in 2", "mated in 1". */
 function pov(line: Line, you: Color): string {
   if (line.mate !== null) {
     const m = you === 'white' ? line.mate : -line.mate;

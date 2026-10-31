@@ -1,4 +1,4 @@
-// Port of blunder/records.py: the per-move records the board UI renders.
+// Build the per-move records rendered by the board UI.
 import { parsePgn, startingPosition } from 'chessops/pgn';
 import { parseSan } from 'chessops/san';
 import { makeFen } from 'chessops/fen';
