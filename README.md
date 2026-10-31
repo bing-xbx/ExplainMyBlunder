@@ -12,6 +12,14 @@ Everything runs on your device: Stockfish 19 lite in WebAssembly, the explanatio
 
 Open the app in your phone's browser and add it to the home screen; it then works offline.
 
+## Optional hosted AI coach
+
+The free ExplainMyBlunder app is open source under GPL-3.0. Game reviews, on-board explanations and What-if analysis run on your device, with no account required.
+
+For players who want to ask follow-up questions about a position, we are developing an optional hosted AI coach. The coach's backend is proprietary, closed-source software and is not included in this repository. The browser interface is included here; the model runs through the hosted service, not on your device. AI coaching is optional: the free app remains complete on its own.
+
+The coach is currently a preview, and paid subscriptions are not yet available. Try the free app and follow this repository for coach preview and launch announcements.
+
 ## Build it
 
 You need Node.js 22 or newer.
