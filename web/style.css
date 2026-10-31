@@ -357,5 +357,5 @@ b.feat { color: #a5d8ff; font-weight: 700; }
 /* Larger reading text on tablets in either orientation. The short side excludes
    phones in landscape; pointer targeting keeps desktop typography unchanged. */
 @media (min-width: 600px) and (min-height: 600px) and (pointer: coarse) {
-  :root { --text-scale: 1.2; }
+  :root { --text-scale: 1.4; }
 }
