@@ -257,6 +257,7 @@ function sideOf(headers, user) {
 function setGame(records, headers, review = null) {
   state.headers = headers || {};
   state.review = review;
+  $('review-guide').hidden = !review;
   state.you = review?.you || sideOf(state.headers, $('user').value.trim());
   state.flipped = false; // a new game starts with your side at the bottom
   state.compare = null;
@@ -461,9 +462,11 @@ async function init() {
   try { cfg = await api('/api/settings'); } catch (e) { /* older server: no settings */ }
   $('user').value = cfg.lichess_user || localStorage.getItem('user') || '';
   $('user-cc').value = cfg.chesscom_user || localStorage.getItem('userCc') || '';
-  if (!$('user').value && !$('user-cc').value) toggleSettings(true); // first visit: ask who you are
-  // Chat: always open on the PC board (it has the LLM); folded on the phone, where it points to the paid coach.
-  if (!backend.local) setFold('chat', true);
+  const hasAccounts = !!($('user').value.trim() || $('user-cc').value.trim());
+  $('account-setup').open = !hasAccounts;
+  $('accounts-title').textContent = hasAccounts ? 'Your game accounts' : 'Review your games';
+  $('auto-review-option').hidden = !hasAccounts;
+  $('find-games').disabled = false;
   $('autosync').checked = !!cfg.auto_sync;
   state.inaccuracies = !!cfg.explain_inaccuracies;
   $('inaccuracies').checked = state.inaccuracies;
@@ -1022,12 +1025,13 @@ function setSheet(name) {
   document.querySelectorAll('#sheet-tabs button').forEach((b) => b.classList.toggle('active', b.dataset.sheet === name));
 }
 
-// On a phone the loader (paste box, username, past reviews) lives in the Games tab.
+// Keep the account-first introduction above the board at every screen size.
+// Only the saved-games list and settings move into tabs on narrow screens.
 function placeLoader() {
-  const loader = $('loader');
-  if (phone.matches) $('games').prepend(loader);
-  else document.querySelector('header').appendChild(loader);
-  $('mygames').hidden = !phone.matches; // the list stays open in the phone's Games tab
+  $('paste-game').appendChild($('loader'));
+  if (phone.matches) $('games').prepend($('mygames-wrap'));
+  else $('header-actions').prepend($('mygames-wrap'));
+  $('mygames').hidden = !phone.matches;
   if (phone.matches) { $('settings-sheet').appendChild($('settings')); $('settings').hidden = false; }
   else { $('settings-wrap').appendChild($('settings')); $('settings').hidden = true; }
   // the chat sits under the board on wide screens, and in its own tab on a phone
@@ -1293,12 +1297,18 @@ async function showVersion() {
     const when = stamp && new Date(stamp.time).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
     if (v) $('about-version').textContent = stamp ? `version ${when} · commit ${stamp.commit}${stamp.local ? ' + local changes' : ''} (${v})` : `version ${v}`;
     const repo = typeof appConfig.github_url === 'string' && /^https:\/\//.test(appConfig.github_url) ? appConfig.github_url.replace(/\/+$/, '') : null;
-    $('about-source').hidden = !(repo && v);
-    if (repo && v) $('about-source').href = `${repo}/tree/site-${v}`;
+    if (repo && v) {
+      $('about-source').href = `${repo}/tree/site-${v}`;
+      $('about-source').title = 'View source for this version on GitHub (GPL-3.0)';
+    } else {
+      $('about-source').removeAttribute('href');
+      $('about-source').removeAttribute('title');
+    }
   } catch (e) { /* offline before the first install */ }
 }
 
 function showPlusCard() {
+  $('coach-plus-badge').hidden = !backend.local;
   if (coachMode()) {
     $('chat-plus').hidden = account.paid();
     $('chat-plus-signin').hidden = account.signedIn();
@@ -1385,7 +1395,7 @@ async function sendChat(text) {
 // the LLM rewording of the cards (2026-10-23): one paid feature, one quota.
 function explainWithAi(node) {
   if (state.node !== node) show(node);
-  setFold('chat', true);
+  if (phone.matches) setSheet('chat');
   const m = node.moment;
   const what = JUDGE[m.judgement];
   sendChat(what ? `Explain ${m.san} simply: why is it a ${what.toLowerCase()}, and what was better?`
@@ -1472,7 +1482,7 @@ function resetChat() {
   $('chat-count').textContent = '';
 }
 
-// Panels fold to their title bar so the move list stays in view; the choice is remembered.
+// The moments list folds to its title bar; the choice is remembered.
 function setFold(id, open) {
   const sec = $(id);
   sec.classList.toggle('collapsed', !open);
@@ -1492,7 +1502,6 @@ function initFold(id, defaultOpen, onOpen) {
   setFold(id, stored === null ? defaultOpen : stored === '1');
 }
 
-initFold('chat', false, () => $('chat-input').focus());
 initFold('moments', true);
 
 $('chat-send').onclick = () => sendChat($('chat-input').value);
@@ -1535,11 +1544,39 @@ document.querySelectorAll('[data-nav]').forEach((b) => (b.onclick = () => nav(b.
 $('to-game').onclick = toGame;
 $('load').onclick = () => load($('input').value);
 $('review').onclick = startReview;
-$('user').onchange = async () => {
-  const name = $('user').value.trim();
-  localStorage.setItem('user', name);
-  await saveSettings({ lichess_user: name });
-  refreshLichessGames();
+$('account-form').onsubmit = async (e) => {
+  e.preventDefault();
+  const lichess = $('user').value.trim(), chesscom = $('user-cc').value.trim();
+  if (!lichess && !chesscom) {
+    $('account-status').textContent = 'Enter a Lichess or chess.com username to find your games.';
+    $('user').focus();
+    return;
+  }
+  $('find-games').disabled = true;
+  $('account-status').textContent = 'Finding your recent games…';
+  try {
+    const cfg = await saveSettings({ lichess_user: lichess, chesscom_user: chesscom });
+    if (!cfg) { $('account-status').textContent = $('error').textContent; return; }
+    localStorage.setItem('user', lichess);
+    localStorage.setItem('userCc', chesscom);
+    $('accounts-title').textContent = 'Your game accounts';
+    $('auto-review-option').hidden = false;
+    recent.loaded = false;
+    await refreshLichessGames(true);
+    $('account-status').textContent = recent.offline ? 'Could not fetch games. Check your connection and try again.'
+      : recent.errors.length ? recent.errors.join(' ')
+      : recent.games.length ? 'Choose a game below, then press Review. Your usernames are saved on this device.'
+      : 'No recent games found. Check your usernames or paste a game instead.';
+    toggleMyGames(true);
+    if (phone.matches) setSheet('games');
+  } finally { $('find-games').disabled = false; }
+};
+$('edit-accounts').onclick = () => {
+  if (phone.matches) setSheet('explain');
+  else toggleSettings(false);
+  $('account-setup').open = true;
+  $('account-setup').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('user').focus({ preventScroll: true });
 };
 $('settings-btn').onclick = () => toggleSettings();
 $('settings-done').onclick = () => (phone.matches ? setSheet('explain') : toggleSettings(false));
@@ -1558,12 +1595,6 @@ $('inaccuracies').onchange = async (e) => {
 document.addEventListener('pointerdown', (e) => {
   if (!phone.matches && !$('settings').hidden && !$('settings-wrap').contains(e.target)) toggleSettings(false);
 });
-$('user-cc').onchange = async () => {
-  const name = $('user-cc').value.trim();
-  localStorage.setItem('userCc', name);
-  await saveSettings({ chesscom_user: name });
-  refreshLichessGames();
-};
 $('autosync').onchange = async (e) => {
   e.target.blur();
   const cfg = await saveSettings({ lichess_user: $('user').value.trim(), chesscom_user: $('user-cc').value.trim(), auto_sync: e.target.checked });
@@ -1588,7 +1619,7 @@ function renderMyGames() {
   box.innerHTML = '';
   const shown = new Set();
 
-  if (!hasName) note('Add your Lichess or chess.com username in ⚙ Settings to see your recent games here.');
+  if (!hasName) note('Enter your Lichess or chess.com username above and press Find my games.');
   else if (!recent.loaded) note(recent.offline ? 'Could not reach Lichess or chess.com. Are you online?' : 'Fetching your recent games…');
   else if (!recent.games.length) note('No games found for that username yet.');
   if (recent.games.length) {
@@ -1632,7 +1663,7 @@ function renderMyGames() {
       box.appendChild(row);
     }
   } else if (!recent.games.length && !reviews.length) {
-    note('No reviewed games yet. Paste a game link or a PGN above and press Review.');
+    note('No reviewed games yet. Find your games using a username, or use “Or, you can also paste a game”.');
   }
   renderMyGamesFoot();
 }

@@ -42,6 +42,7 @@ async function open() {
   await page.goto(base);
   await page.waitForFunction(() => document.body.classList.contains('local'));
   await page.waitForFunction(() => !document.getElementById('chat-plus').hidden, { timeout: 5000 });
+  await page.waitForFunction(() => document.getElementById('about-version').textContent.startsWith('version ') && document.querySelector('#board piece') && document.getElementById('context').textContent.trim());
   await page.evaluate(() => document.querySelector('#chat-suggest .chip').click());
   const state = await page.evaluate(() => {
     const msgs = [...document.querySelectorAll('#chat-log .msg')];
@@ -49,7 +50,7 @@ async function open() {
     return { msgs: msgs.map((m) => m.className + ': ' + m.innerText), link: link.hidden ? null : link.href,
              soon: !document.getElementById('chat-plus-soon').hidden, replyLink: msgs.at(-1)?.querySelector('a')?.href || null,
              support: document.getElementById('support').hidden ? null : [...document.querySelectorAll('#support a')].filter((x) => !x.hidden).map((x) => x.href),
-             source: document.getElementById('about-source').hidden ? null : document.getElementById('about-source').href };
+             versionText: document.getElementById('about-version').textContent, source: !document.getElementById('about-source').hasAttribute('href') ? null : document.getElementById('about-source').href };
   });
   await page.close();
   return { ...state, errors };
@@ -63,14 +64,14 @@ try {
   check(!a.errors.length, `no page errors ${a.errors.join('; ')}`);
 
   check(a.support === null, 'no github_url: no star link');
-  check(a.source === null, 'no github_url: no source link');
+  check(a.source === null && a.versionText.startsWith('version '), 'no github_url: version remains readable without a source link');
 
   config = { backend: null, upgrade_url: 'https://example.com/plus', github_url: 'https://github.com/example/repo' };
   const b = await open();
   check(!b.soon && b.link === 'https://example.com/plus', 'upgrade_url: the card links to the plan');
   check(b.replyLink === 'https://example.com/plus', 'upgrade_url: the answer links to the plan too');
   check(JSON.stringify(b.support) === JSON.stringify(['https://github.com/example/repo']), `the star link shows (${b.support})`);
-  check(/^https:\/\/github\.com\/example\/repo\/tree\/site-[0-9a-f]{12}$/.test(b.source || ''), `the source link names this version's tag (${b.source})`);
+  check(/^https:\/\/github\.com\/example\/repo\/tree\/site-[0-9a-f]{12}$/.test(b.source || ''), `the version text links to this version's source tag (${b.source})`);
   check(!b.errors.length, `no page errors ${b.errors.join('; ')}`);
 } catch (e) {
   check(false, `error: ${e.message}`);

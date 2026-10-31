@@ -20,12 +20,9 @@
 <body>
   <button id="update" hidden title="A new version of the app is downloaded; tap to switch to it">New version: tap to reload</button>
   <header>
-    <h1>ExplainMyBlunder</h1>
-    <div id="loader">
-      <textarea id="input" spellcheck="false" placeholder="Paste a game link (Lichess or chess.com) or a PGN, and press Review to find and explain the blunders. A position (FEN) opens to explore."></textarea>
-      <div class="loader-buttons">
-        <button id="review" title="A game: find and explain its blunders. A position: show it on the board">Review</button>
-        <button id="load" class="link-btn" title="Show the pasted game on the board without reviewing it">or just show it</button>
+    <div class="header-row">
+      <h1>ExplainMyBlunder</h1>
+      <div id="header-actions">
         <div id="mygames-wrap">
           <button id="sync" class="secondary" aria-expanded="false" title="All your games: your recent Lichess and chess.com games to review or open, and your other reviews">My games ▾</button>
           <div id="mygames" hidden>
@@ -42,19 +39,14 @@
           <button id="settings-btn" class="secondary" aria-expanded="false" title="Settings">⚙ Settings</button>
           <div id="settings" hidden>
             <section class="set-sec">
-              <h3>Your accounts</h3>
-              <p class="muted acc-help">Your username on <b>Lichess or chess.com</b>: one is enough, both if you play on both. My games lists your newest games there.</p>
-              <label class="acc-row"><span class="site-tag lichess">Lichess</span>
-                <input id="user" placeholder="Lichess username (optional)" spellcheck="false" autocomplete="off"></label>
-              <label class="acc-row"><span class="site-tag chesscom">chess.com</span>
-                <input id="user-cc" placeholder="chess.com username (optional)" spellcheck="false" autocomplete="off"></label>
+              <h3>Your game accounts</h3>
+              <button id="edit-accounts" class="link-btn">Edit Lichess / chess.com usernames</button>
             </section>
             <section class="set-sec">
               <h3>Reviews</h3>
               <label class="acc-row" id="inaccuracies-label"><input type="checkbox" id="inaccuracies">
                 <span>Also explain inaccuracies (?!) <span class="muted">Reviews take longer.</span></span></label>
-              <label class="acc-row" id="autosync-label" title="When the app opens: review your newest game on each site, unless it is already reviewed">
-                <input type="checkbox" id="autosync"> Automatically review my newest game when the app opens</label>
+
             </section>
             <section class="set-sec" id="plan-wrap" hidden>
               <h3>Account and plan</h3>
@@ -79,15 +71,48 @@
             </section>
             <section class="set-sec">
               <h3>About</h3>
-              <p class="muted acc-help">ExplainMyBlunder <span id="about-version"></span>.</p>
-              <p class="set-links"><a id="about-star" target="_blank" rel="noopener" hidden>★ Star it on GitHub</a> <a id="about-source" target="_blank" rel="noopener" hidden>Source code of this version (GPL-3.0)</a></p>
+              <p class="muted acc-help">ExplainMyBlunder <a id="about-source" target="_blank" rel="noopener"><span id="about-version"></span></a>.</p>
+              <p class="set-links"><a id="about-star" target="_blank" rel="noopener" hidden>★ Star it on GitHub</a></p>
             </section>
             <div class="acc-actions"><button id="settings-done">Done</button></div>
           </div>
         </div>
+      </div>
+    </div>
+    <details id="account-setup" open>
+      <summary><span id="accounts-title">Review your games</span><span class="accounts-summary muted">Lichess or chess.com · no password needed</span></summary>
+      <div class="account-content">
+        <p class="account-intro"><strong>Enter one username, or both.</strong> <span class="muted">Choose a recent game and we’ll show where it went wrong.</span></p>
+        <form id="account-form">
+          <div class="account-fields">
+              <label class="acc-row"><span class="site-tag lichess">Lichess</span>
+                <input id="user" placeholder="Lichess username" spellcheck="false" autocomplete="off"></label>
+              <label class="acc-row"><span class="site-tag chesscom">chess.com</span>
+                <input id="user-cc" placeholder="chess.com username" spellcheck="false" autocomplete="off"></label>
+            <button id="find-games" type="submit" disabled>Find my games</button>
+          </div>
+          <p id="account-status" class="muted" role="status" aria-live="polite"></p>
+        </form>
+        <div id="auto-review-option" hidden>
+              <label class="acc-row" id="autosync-label" title="When the app opens: review your newest game on each site, unless it is already reviewed">
+                <input type="checkbox" id="autosync"> Automatically review my newest game when the app opens</label>
+          <p class="muted auto-help">Optional. Turning this on also reviews your newest game now.</p>
+        </div>
+      </div>
+    </details>
+    <details id="paste-game">
+      <summary><span>Or, you can also paste a game</span><span class="muted">link, PGN or FEN</span></summary>
+    <div id="loader">
+      <textarea id="input" spellcheck="false" placeholder="Paste a game link (Lichess or chess.com) or a PGN, and press Review to find and explain the blunders. A position (FEN) opens to explore."></textarea>
+      <div class="loader-buttons">
+        <button id="review" title="A game: find and explain its blunders. A position: show it on the board">Review</button>
+        <button id="load" class="link-btn" title="Show the pasted game on the board without reviewing it">or just show it</button>
+      </div>
+    </div>
+    </details>
+    <div id="review-status">
         <span id="progress-wrap"><span id="progress-bar" class="pbar" hidden><span class="pbar-fill"></span></span><span id="progress" class="muted"></span></span>
         <span id="error" role="alert"></span>
-      </div>
     </div>
   </header>
 
@@ -111,17 +136,18 @@
         <button data-nav="next" title="Next move (→)">▶</button>
         <button data-nav="end" title="Last move (End)">⏭</button>
         <button id="to-game" class="secondary" hidden title="Leave the variation and return to the game">↩ Back to the game</button>
-        <label id="whatif-label" title="Explain every move you drag on the board"><input type="checkbox" id="whatif" checked> What if: explain my moves</label>
+        <label id="whatif-label" title="Explain every move you drag on the board"><input type="checkbox" id="whatif" checked> Explain moves I try</label>
+      </div>
+      <div id="board-help">
+        <p><b>Try another move.</b> Drag pieces at any time to try your own moves. With “Explain moves I try” on, we’ll explain your move and compare it with the best move.</p>
+        <p id="review-guide" hidden><b>Explore a mistake.</b> Tap a marked move to see what it allowed and what you could have played. Use ◀ / ▶ to follow the line.</p>
       </div>
       <div id="caption" hidden></div>
       <div id="strip" aria-label="moves"></div>
-      <section id="chat" class="sheet-chat collapsed">
-        <button id="chat-toggle" class="sec-toggle" aria-expanded="false">
-          <span class="chev">▸</span> Ask about this position <span id="chat-count" class="muted"></span>
-        </button>
+      <section id="chat" class="sheet-chat" aria-labelledby="chat-title">
+        <h2 id="chat-title" class="coach-title">Ask the AI coach <span id="coach-plus-badge" class="plus-badge" hidden>Plus</span> <span id="chat-count" class="muted"></span></h2>
         <div id="chat-body">
         <div id="chat-plus" class="plus-card" hidden>
-          <b>Ask the coach</b> <span class="plus-badge">Plus</span>
           <p>Ask anything about the position on your board, in plain words: why a move loses, what to play instead, each side's plan. The coach checks every move it mentions with the engine. It is part of the paid plan; everything else in this app stays free.</p>
           <a id="chat-plus-link" class="plus-link" target="_blank" rel="noopener" hidden>See the coach plan</a>
           <span id="chat-plus-soon" class="muted">Coming soon.</span>
@@ -169,7 +195,7 @@
         </div>
         <div id="moves"></div>
       </section>
-      <p class="muted help">← / → step through the moves, Home / End jump to the start or end. Click a move in a variation to enter it; → then follows that variation, and "Back to the game" returns. Drag pieces to try your own moves.</p>
+      <p class="muted help">After loading a game, use ← / → to step through the moves, and Home / End to jump to the start or end. Click a move in a variation to enter it; → then follows that variation, and "Back to the game" returns. Drag pieces at any time to try your own moves. With “Explain moves I try” on, we’ll explain your move and compare it with the best move.</p>
     </aside>
   </main>
 
