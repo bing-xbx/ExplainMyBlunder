@@ -1,6 +1,7 @@
 // The phone-only pieces: the UCI engine wrapper and the whole-game review.
 import { describe, expect, it } from 'vitest';
 import { RecordedEvaluator, UciEngine, gameId, lichessScores, parseInfo, playedAt, reviewGame, splitPgns } from '../src';
+import { isSafeReview, REVIEW_ID } from '../src/review-input';
 
 describe('parseInfo', () => {
   it('turns side-to-move scores into White point of view', () => {
@@ -69,6 +70,17 @@ describe('reviews', () => {
     expect(r.you).toBe('white');
     expect(r.records).toHaveLength(5);
     expect(r.moments.map((m: any) => [m.index, m.san, m.judgement])).toEqual([[3, 'g4', 'blunder']]);
+  });
+  it('keeps reviews valid and distinct when URL tails contain only punctuation', async () => {
+    const first = '[Site "https://example.org/!!!"]\n\n1. e4 e5 *';
+    const second = '[Site "https://example.org/???"]\n\n1. d4 d5 *';
+    const evaluator = { evaluate: async () => [{ move: 'a2a3', cp: 0, mate: null, pv: ['a2a3'] }] };
+    const reviews = await Promise.all([first, second].map((pgn) => reviewGame(pgn, evaluator, null, undefined, false)));
+    expect(reviews.every(isSafeReview)).toBe(true);
+    expect(reviews.every((r) => REVIEW_ID.test(r.id))).toBe(true);
+    expect(reviews.map((r) => r.id)).toEqual(['g773p8t', 'g18xpjyp']);
+    const chesscom = '[Site "Chess.com"]\n[Link "https://www.chess.com/!!!"]\n\n1. e4 *';
+    expect(gameId(chesscom)).toBe('chesscom-g1k0rv04');
   });
 });
 

@@ -25,7 +25,8 @@ export function gameId(pgn: string): string {
   const url = m ? m[1].replace(/\/+$/, '') : '';
   // only a URL with a path names a game; a bare site would make every such game the same review
   const tail = /^[a-z]+:\/\/[^/]+\/./i.test(url) ? url.split('/').pop()! : hashId(pgn);
-  return (url.includes('chess.com/') ? 'chesscom-' : '') + tail.replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
+  const id = tail.replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40) || hashId(pgn);
+  return (url.includes('chess.com/') ? 'chesscom-' : '') + id;
 }
 
 function hashId(text: string): string {
