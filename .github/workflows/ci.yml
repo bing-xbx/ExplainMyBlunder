@@ -1,13 +1,23 @@
-# The app's checks on every push and pull request: unit tests, typecheck, build, and the browser
-# tests (offline updates, the coach card, a short UI monkey run) in the runner's Chrome.
+# Repeatable app checks for contributors; all services and account data are synthetic.
 name: ci
-on: [push, pull_request]
+on:
+  push:
+    branches: ['**']
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: core
+    env:
+      CHROME_PATH: /usr/bin/google-chrome
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,11 +30,7 @@ jobs:
       - run: npm run typecheck
       - run: npm run build
       - run: node test/ui/update.mjs
-        env:
-          CHROME_PATH: /usr/bin/google-chrome
       - run: node test/ui/plus.mjs
-        env:
-          CHROME_PATH: /usr/bin/google-chrome
+      - run: node test/ui/account.mjs
+      - run: node test/ui/security.mjs
       - run: node test/ui/monkey.mjs --seed 1 --actions 60 --screens desktop,phone
-        env:
-          CHROME_PATH: /usr/bin/google-chrome

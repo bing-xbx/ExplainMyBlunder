@@ -41,6 +41,7 @@ function built() {
     // a shallow clone would date every file to its one commit and give each push a new stamp
     if (git('rev-parse', '--is-shallow-repository') === 'true') git('fetch', '--quiet', '--unshallow');
     const [time, commit] = git('log', '-1', '--format=%cI %h', '--', ...APP_PATHS).split(' ');
+    if (!time || !commit) return null;
     return { time, commit, local: git('status', '--porcelain', '--', ...APP_PATHS) !== '' };
   } catch {
     console.warn('no git history: About shows the version hash only');

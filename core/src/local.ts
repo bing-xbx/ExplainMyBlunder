@@ -1,3 +1,4 @@
+import { isSafeReview } from './review-input';
 // Browser API backed by Stockfish WebAssembly, the analysis core and IndexedDB.
 // Game downloads use the Lichess and chess.com public APIs.
 import { InputError, load, play } from './records';
@@ -148,6 +149,7 @@ async function loadReview(id: string): Promise<Review> {
   if (!REVIEW_ID.test(id)) throw new InputError('bad review id');
   const r = await tx<Review | undefined>('reviews', 'readonly', (s) => s.get(id));
   if (!r) throw new InputError('no such review');
+  if (!isSafeReview(r)) throw new InputError('This saved review is not valid.');
   return r;
 }
 
@@ -155,9 +157,7 @@ async function loadReview(id: string): Promise<Review> {
 export async function importReviews(items: unknown[]): Promise<{ imported: number; skipped: number }> {
   let imported = 0, skipped = 0;
   for (const r of items as Review[]) {
-    const ok = r && typeof r === 'object' && typeof r.id === 'string' && REVIEW_ID.test(r.id) &&
-      Array.isArray(r.records) && r.records.length > 0 && Array.isArray(r.moments) && r.headers && typeof r.headers === 'object';
-    if (!ok) { skipped++; continue; }
+    if (!isSafeReview(r)) { skipped++; continue; }
     await saveReview(r);
     imported++;
   }
@@ -404,6 +404,7 @@ async function route(path: string, body: Record<string, any>, signal?: AbortSign
       // "Also explain inaccuracies" turned on: queue them for a game reviewed before.
       const r = await tx<Review | undefined>('reviews', 'readonly', (s) => s.get(str(body.id)));
       if (!r) throw new InputError('no such review');
+  if (!isSafeReview(r)) throw new InputError('This saved review is not valid.');
       const added = markInaccuracies(r);
       if (added) { await saveReview(r); queueCards(r); }
       return { added };

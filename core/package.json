@@ -9,7 +9,8 @@
     "test:ui": "node tools/build-web.mjs && node test/ui/monkey.mjs",
     "test:update": "node tools/build-web.mjs && node test/ui/update.mjs",
     "test:plus": "node tools/build-web.mjs && node test/ui/plus.mjs",
-    "test:account": "node tools/build-web.mjs && node test/ui/account.mjs"
+    "test:account": "node tools/build-web.mjs && node test/ui/account.mjs",
+    "test:security": "node tools/build-web.mjs && node test/ui/security.mjs"
   },
   "dependencies": {
     "chessops": "^0.15.1",

@@ -45,7 +45,11 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   const url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== location.origin) return;
-  const key = req.mode === 'navigate' ? '/' : url.pathname; // "/?local=1" is still the page
+  // Only board navigations use the offline page. Checkout and API URLs must reach
+  // the network rather than receiving cached HTML (and never enter this cache).
+  if (req.mode === 'navigate' && !['/', '/index.html'].includes(url.pathname)) return;
+  const key = req.mode === 'navigate' ? '/' : url.pathname;
+  if (!FILES.includes(key)) return;
   e.respondWith((async () => {
     const cached = await (await caches.open(CACHE)).match(key);
     return cached || fetch(req);

@@ -4,22 +4,23 @@
 //
 //   "backend": { "api": "", "region": "us-east-1", "client_id": "<app client id>" }
 //
-// `api` is where /v1 lives ("" = this site, served by the Worker in edge/). Every paid call is
+// `api` is the same-origin /v1 service. Credentials stay in secure HttpOnly cookies. Every paid call is
 // checked again by the service; nothing here decides what you may use.
 
 export const API_LEVEL = 1; // sent as X-Api-Level; the service answers 426 below its minimum
 
-const KEY = 'blunderAccount';
+const KEY = 'blunderAccount'; // legacy credentials: read once and remove during upgrade
+const SESSION_HINT = 'blunderSession'; // a display hint only; the server authorizes every request
 let cfg = null;
-let tokens = null; // { access, refresh, expires (ms), email }
+let session = false;
 let me = null;
 let onChange = () => {};
 
 const $ = (id) => document.getElementById(id);
-const save = () => (tokens ? localStorage.setItem(KEY, JSON.stringify(tokens)) : localStorage.removeItem(KEY));
+
 
 export const enabled = () => !!cfg;
-export const signedIn = () => !!tokens;
+export const signedIn = () => session;
 export const paid = () => !!me?.active;
 export const info = () => me;
 
@@ -41,14 +42,26 @@ async function cognito(action, body) {
   return data;
 }
 
-function keep(result, email) {
-  tokens = {
-    access: result.AccessToken,
-    refresh: result.RefreshToken || tokens?.refresh,
-    expires: Date.now() + (result.ExpiresIn || 3600) * 1000,
-    email: email || tokens?.email,
-  };
-  save();
+function apiUrl(path) {
+  const url = new URL(`${cfg.api || ''}${path}`, location.origin);
+  if (url.origin !== location.origin) throw new Error('The account service must use this app’s origin.');
+  return url;
+}
+
+async function sessionRequest(path, body = {}) {
+  const res = await fetch(apiUrl(path), { method: 'POST', credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json', 'X-Api-Level': String(API_LEVEL) }, body: JSON.stringify(body) });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw Object.assign(new Error(data.error || 'Sign in again.'), { code: data.code, status: res.status });
+  }
+  return res.json();
+}
+
+async function establish(result) {
+  await sessionRequest('/v1/auth/session', { access: result.AccessToken, refresh: result.RefreshToken });
+  session = true;
+  try { localStorage.setItem(SESSION_HINT, '1'); } catch {}
 }
 
 let pending = null; // the sign-in in progress: { email, session, step: 'signup' | 'otp' }
@@ -85,57 +98,49 @@ export async function enterCode(code) {
   }
   if (!result?.AccessToken) throw new Error('That code did not work; ask for a new one.');
   pending = null;
-  keep(result, email);
+  await establish(result);
   await refreshMe();
 }
 
-async function accessToken() {
-  if (!tokens) return null;
-  if (Date.now() > tokens.expires - 60_000) {
-    try {
-      const r = await cognito('InitiateAuth', { ClientId: cfg.client_id, AuthFlow: 'REFRESH_TOKEN_AUTH',
-        AuthParameters: { REFRESH_TOKEN: tokens.refresh } });
-      keep(r.AuthenticationResult);
-    } catch (e) {
-      forget();
-      return null;
-    }
-  }
-  return tokens.access;
-}
-
 function forget() {
-  tokens = null;
+  try { localStorage.removeItem(SESSION_HINT); } catch {}
+  session = false;
   me = null;
-  save();
   onChange();
 }
 
 export async function signOut() {
-  const t = tokens;
+  await sessionRequest('/v1/auth/logout');
   forget();
-  if (t?.refresh) cognito('RevokeToken', { ClientId: cfg.client_id, Token: t.refresh }).catch(() => {});
+}
+
+let refreshing = null;
+function refreshSession() {
+  if (!refreshing) refreshing = sessionRequest('/v1/auth/refresh').finally(() => { refreshing = null; });
+  return refreshing;
 }
 
 // ---------- the service ----------
 
 export async function api(method, path, body) {
-  const token = await accessToken();
-  if (!token) throw Object.assign(new Error('Sign in to use the coach.'), { code: 'sign_in' });
-  const res = await fetch(`${cfg.api || ''}${path}`, {
-    method,
-    headers: { Authorization: `Bearer ${token}`, 'X-Api-Level': String(API_LEVEL), ...(body ? { 'Content-Type': 'application/json' } : {}) },
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  const send = () => fetch(apiUrl(path), { method, credentials: 'same-origin',
+    headers: { 'X-Api-Level': String(API_LEVEL), ...(body ? { 'Content-Type': 'application/json' } : {}) },
+    body: body ? JSON.stringify(body) : undefined });
+  let res = await send();
+  if (res.status === 401) {
+    try { await refreshSession(); res = await send(); }
+    catch (e) { if (e.status === 401) forget(); throw e; }
+  }
   const data = await res.json().catch(() => ({}));
   if (res.status === 401) forget();
   if (res.status === 426) $('update').hidden = false;
   if (!res.ok) throw Object.assign(new Error(data.error || res.statusText), { code: data.code, status: res.status });
+  session = true;
+  try { localStorage.setItem(SESSION_HINT, '1'); } catch {}
   return data;
 }
 
 export async function refreshMe() {
-  if (!tokens) { me = null; onChange(); return null; }
   try {
     me = await api('GET', '/v1/me');
   } catch (e) {
@@ -167,13 +172,32 @@ export async function deleteAccount() {
 // ---------- start ----------
 
 export async function init(backendConfig, changed) {
+  // Remove legacy credentials even when an installation disables the account service.
+  let legacy = null;
+  try { legacy = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch {}
+  try { localStorage.removeItem(KEY); sessionStorage.removeItem(KEY); } catch {}
   if (!backendConfig || !backendConfig.client_id) return;
   cfg = backendConfig;
   onChange = changed || onChange;
-  try { tokens = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { tokens = null; }
-  await refreshMe();
+  if (legacy?.access && legacy?.refresh) {
+    try {
+      let result = { AccessToken: legacy.access, RefreshToken: legacy.refresh };
+      if (Date.now() >= legacy.expires) {
+        const renewed = await cognito('InitiateAuth', { ClientId: cfg.client_id, AuthFlow: 'REFRESH_TOKEN_AUTH',
+          AuthParameters: { REFRESH_TOKEN: legacy.refresh } });
+        result.AccessToken = renewed.AuthenticationResult?.AccessToken;
+      }
+      await establish(result);
+    } catch { /* ask for a fresh code if a legacy session has expired or cannot be upgraded */ }
+  }
+  legacy = null;
+  let remembered = session;
+  try { remembered ||= localStorage.getItem(SESSION_HINT) === '1'; } catch {}
+  // Free visitors do not invoke the account service merely by opening the board.
+  if (remembered) await refreshMe();
+  else onChange();
   // After a checkout in another tab or browser view, the plan shows up when you come back.
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && tokens) refreshMe();
+    if (document.visibilityState === 'visible' && session) refreshMe();
   });
 }

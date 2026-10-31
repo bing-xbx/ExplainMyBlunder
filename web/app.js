@@ -909,7 +909,12 @@ function renderMoves() {
     }
     box.appendChild(d);
   }
-  if (last.rec.outcome) box.insertAdjacentHTML('beforeend', `<div class="result">${last.rec.outcome}</div>`);
+  if (last.rec.outcome) {
+    const result = document.createElement('div');
+    result.className = 'result';
+    result.textContent = String(last.rec.outcome);
+    box.appendChild(result);
+  }
   const current = box.querySelector('.mv.current');
   current?.scrollIntoView({ block: 'nearest' });
   // On a judged move, also bring its comment into view, up to the first line under it.
@@ -1259,7 +1264,7 @@ function addMsg(role, text, extra = {}) {
   const el = document.createElement('div');
   el.className = `msg ${role}`;
   el.innerHTML = (extra.where ? `<div class="where">${escapeHtml(extra.where)}</div>` : '') + renderChatText(text) +
-    (extra.tools?.length ? `<div class="meta">checked with: ${extra.tools.map((t) => t.tool.replace('_', ' ')).join(', ')}</div>` : '') +
+    (extra.tools?.length ? `<div class="meta">checked with: ${extra.tools.map((t) => escapeHtml(String(t.tool).replaceAll('_', ' '))).join(', ')}</div>` : '') +
     (extra.unchecked?.length ? `<div class="warn">⚠ not checked against the engine: ${escapeHtml(extra.unchecked.join(', '))}</div>` : '');
   $('chat-log').appendChild(el);
   $('chat-log').scrollTop = $('chat-log').scrollHeight;
