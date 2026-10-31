@@ -28,6 +28,7 @@ const DEFAULTS = { lichess_user: null as string | null, chesscom_user: null as s
 let dbp: Promise<IDBDatabase> | null = null;
 function db(): Promise<IDBDatabase> {
   return (dbp ??= new Promise((resolve, reject) => {
+    // Keep the original database name so existing ExplainMyBlunder reviews remain available.
     const req = indexedDB.open('blunder-explainer', 1);
     req.onupgradeneeded = () => {
       const d = req.result;

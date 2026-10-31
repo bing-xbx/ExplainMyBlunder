@@ -2,6 +2,7 @@
 // backend), a copy of the Stockfish WebAssembly engine, and sw.js (the offline service worker,
 // stamped with a hash of every app file). Cloudflare Pages runs this.
 import { build } from 'esbuild';
+import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -29,5 +30,24 @@ const template = readFileSync('src/sw.js', 'utf8');
 const hash = createHash('sha256').update(template);
 for (const f of FILES) hash.update(f).update(readFileSync(join('../web', f === '/' ? 'index.html' : f.slice(1))));
 const version = hash.digest('hex').slice(0, 12);
-writeFileSync('../web/sw.js', template.replace('__FILES__', JSON.stringify(FILES)).replace('__VERSION__', JSON.stringify(version)));
-console.log(`built web/core.js, web/vendor/stockfish/ and web/sw.js (version ${version})`);
+// About shows when the app last changed: the last commit touching what the build reads, so a push
+// that changes only docs keeps the same stamp (and the same sw.js: no needless update on phones).
+// release_site.py builds from `git archive` (no history), so it passes APP_COMMIT in.
+const APP_PATHS = ['web', 'core/src', 'core/tools', 'core/package.json', 'core/package-lock.json'];
+function built() {
+  if (process.env.APP_COMMIT) return JSON.parse(process.env.APP_COMMIT);
+  const git = (...a) => execFileSync('git', a, { cwd: '..', encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  try {
+    // a shallow clone would date every file to its one commit and give each push a new stamp
+    if (git('rev-parse', '--is-shallow-repository') === 'true') git('fetch', '--quiet', '--unshallow');
+    const [time, commit] = git('log', '-1', '--format=%cI %h', '--', ...APP_PATHS).split(' ');
+    return { time, commit, local: git('status', '--porcelain', '--', ...APP_PATHS) !== '' };
+  } catch {
+    console.warn('no git history: About shows the version hash only');
+    return null;
+  }
+}
+const stamp = built();
+writeFileSync('../web/sw.js', template.replace('__FILES__', JSON.stringify(FILES)).replace('__VERSION__', JSON.stringify(version))
+  .replace('__BUILT__', JSON.stringify(stamp)));
+console.log(`built web/core.js, web/vendor/stockfish/ and web/sw.js (version ${version}${stamp ? `, commit ${stamp.commit} of ${stamp.time}${stamp.local ? ' + local changes' : ''}` : ''})`);

@@ -7,6 +7,8 @@
 // Only the app's own files are cached: games come from Lichess, and reviews live in IndexedDB.
 const FILES = __FILES__;
 const VERSION = __VERSION__;
+// The last commit that changed the app (its time and short id), for About; not used here.
+const BUILT = __BUILT__;
 const PREFIX = 'blunder-';
 const CACHE = PREFIX + VERSION;
 const LEGACY = 'blunder-app'; // the cache of the first service worker, which refreshed file by file

@@ -1,4 +1,4 @@
-// The Blunder Explainer core: the Python logic of blunder/, ported to TypeScript so it
+// The ExplainMyBlunder core: the Python logic of blunder/, ported to TypeScript so it
 // runs in the browser (and on the phone) with no server.
 export * from './board';
 export * from './engine';

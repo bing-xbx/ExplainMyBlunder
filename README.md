@@ -1,4 +1,6 @@
-# Blunder Explainer
+# ExplainMyBlunder
+
+The standalone ExplainMyBlunder app, distilled from the complete private project.
 
 Find the moments you threw away in your chess games, and see why, on your phone.
 

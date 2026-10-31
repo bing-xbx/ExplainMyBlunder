@@ -1287,7 +1287,11 @@ async function showVersion() {
   try {
     const text = await (await fetch('/sw.js')).text();
     const v = /VERSION = "([^"]+)"/.exec(text)?.[1];
-    if (v) $('about-version').textContent = `version ${v}`;
+    const b = /const BUILT = (\{[^;\n]*\});/.exec(text);
+    const stamp = b ? JSON.parse(b[1]) : null;
+    // the commit time in your own time zone, to the minute, and its id, so you can find the diff
+    const when = stamp && new Date(stamp.time).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    if (v) $('about-version').textContent = stamp ? `version ${when} · commit ${stamp.commit}${stamp.local ? ' + local changes' : ''} (${v})` : `version ${v}`;
     const repo = typeof appConfig.github_url === 'string' && /^https:\/\//.test(appConfig.github_url) ? appConfig.github_url.replace(/\/+$/, '') : null;
     $('about-source').hidden = !(repo && v);
     if (repo && v) $('about-source').href = `${repo}/tree/site-${v}`;
@@ -1702,7 +1706,9 @@ $('mygames-review').onclick = () => reviewBatch(recent.games.map((g) => g.id).fi
 document.addEventListener('pointerdown', (e) => {
   if (!$('mygames').hidden && !$('mygames-wrap').contains(e.target) && !phone.matches) toggleMyGames(false);
 });
-$('whatif').onchange = (e) => e.target.blur();
+// What if is on unless you turned it off (it costs only engine time on this device, no LLM).
+$('whatif').checked = localStorage.getItem('whatif') !== '0';
+$('whatif').onchange = (e) => { localStorage.setItem('whatif', e.target.checked ? '1' : '0'); e.target.blur(); };
 document.addEventListener('keydown', (e) => {
   // Text fields keep their keys; checkboxes and buttons do not.
   const t = e.target;

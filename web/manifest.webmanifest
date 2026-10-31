@@ -1,6 +1,6 @@
 {
-  "name": "Blunder Explainer",
-  "short_name": "Blunders",
+  "name": "ExplainMyBlunder",
+  "short_name": "ExplainMyBlunder",
   "description": "Your Lichess games reviewed with Stockfish, with every blunder explained on the board.",
   "start_url": "/",
   "scope": "/",

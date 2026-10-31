@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Blunder Explainer</title>
+  <title>ExplainMyBlunder</title>
   <link rel="icon" href="/icon-192.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Blunders">
+  <meta name="apple-mobile-web-app-title" content="ExplainMyBlunder">
   <meta name="theme-color" content="#262421">
   <link rel="stylesheet" href="/vendor/chessground/chessground.base.css">
   <link rel="stylesheet" href="/vendor/chessground/chessground.brown.css">
@@ -20,7 +20,7 @@
 <body>
   <button id="update" hidden title="A new version of the app is downloaded; tap to switch to it">New version: tap to reload</button>
   <header>
-    <h1>Blunder Explainer</h1>
+    <h1>ExplainMyBlunder</h1>
     <div id="loader">
       <textarea id="input" spellcheck="false" placeholder="Paste a game link (Lichess or chess.com) or a PGN, and press Review to find and explain the blunders. A position (FEN) opens to explore."></textarea>
       <div class="loader-buttons">
@@ -79,7 +79,7 @@
             </section>
             <section class="set-sec">
               <h3>About</h3>
-              <p class="muted acc-help">Blunder Explainer <span id="about-version"></span>.</p>
+              <p class="muted acc-help">ExplainMyBlunder <span id="about-version"></span>.</p>
               <p class="set-links"><a id="about-star" target="_blank" rel="noopener" hidden>★ Star it on GitHub</a> <a id="about-source" target="_blank" rel="noopener" hidden>Source code of this version (GPL-3.0)</a></p>
             </section>
             <div class="acc-actions"><button id="settings-done">Done</button></div>
@@ -104,16 +104,17 @@
         </div>
       </div>
       <div class="player" id="player-bottom"></div>
-      <div id="caption" hidden></div>
-      <div id="strip" aria-label="moves"></div>
+      <!-- right under the board, above the caption and the strip, so the buttons never move when they grow -->
       <div id="nav">
         <button data-nav="start" title="First move (Home)">⏮</button>
         <button data-nav="prev" title="Previous move (←)">◀</button>
         <button data-nav="next" title="Next move (→)">▶</button>
         <button data-nav="end" title="Last move (End)">⏭</button>
         <button id="to-game" class="secondary" hidden title="Leave the variation and return to the game">↩ Back to the game</button>
-        <label id="whatif-label" title="Explain every move you drag on the board"><input type="checkbox" id="whatif"> What if: explain my moves</label>
+        <label id="whatif-label" title="Explain every move you drag on the board"><input type="checkbox" id="whatif" checked> What if: explain my moves</label>
       </div>
+      <div id="caption" hidden></div>
+      <div id="strip" aria-label="moves"></div>
       <section id="chat" class="sheet-chat collapsed">
         <button id="chat-toggle" class="sec-toggle" aria-expanded="false">
           <span class="chev">▸</span> Ask about this position <span id="chat-count" class="muted"></span>
@@ -128,9 +129,10 @@
         </div>
         <div id="chat-log"></div>
         <div id="chat-suggest">
-          <button class="secondary chip">Why is this a blunder?</button>
-          <button class="secondary chip">What should I have played, and why?</button>
+          <button class="secondary chip">What should I have checked before playing this?</button>
+          <button class="secondary chip">What pattern is this, so I spot it next time?</button>
           <button class="secondary chip">What is each side's plan here?</button>
+          <button class="secondary chip">How do I play on from here?</button>
         </div>
         <div id="chat-row">
           <textarea id="chat-input" rows="2" placeholder="Ask anything about the board you see (Enter to send, Shift+Enter for a new line)"></textarea>
