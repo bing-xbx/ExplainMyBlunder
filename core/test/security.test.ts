@@ -9,6 +9,14 @@ describe('saved review input', () => {
   it('accepts complete public-game reviews, including explanation variations', () => {
     for (const review of reviews) expect(isSafeReview(review), review.id).toBe(true);
   });
+  it('uses the same identifier boundary as saved-review lookup', () => {
+    const r = fresh(); r.id = 'x'.repeat(60);
+    expect(isSafeReview(r)).toBe(true);
+    r.id += 'x';
+    expect(isSafeReview(r)).toBe(false);
+    r.id = '../other-review';
+    expect(isSafeReview(r)).toBe(false);
+  });
   it('rejects script markup in the game result', () => {
     const r = fresh();
     r.records.at(-1).outcome = '<img src=x onerror=alert(1)>';

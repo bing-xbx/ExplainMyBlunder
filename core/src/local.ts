@@ -1,4 +1,4 @@
-import { isSafeReview } from './review-input';
+import { isSafeReview, REVIEW_ID } from './review-input';
 // Browser API backed by Stockfish WebAssembly, the analysis core and IndexedDB.
 // Game downloads use the Lichess and chess.com public APIs.
 import { InputError, load, play } from './records';
@@ -16,7 +16,6 @@ const threaded = () => typeof crossOriginIsolated !== 'undefined' && crossOrigin
 // A fixed search budget keeps reviews practical on mobile devices.
 export const REVIEW_NODES = 250_000;
 const WHATIF_NODES = 300_000; // Interactive move explanations.
-const REVIEW_ID = /^[A-Za-z0-9_-]{1,60}$/;
 const LICHESS_NAME = /^[A-Za-z0-9][A-Za-z0-9_-]{1,29}$/;
 const CHESSCOM_NAME = /^[A-Za-z0-9][A-Za-z0-9_-]{2,24}$/;
 // Sync: your latest game on each site you have a name for

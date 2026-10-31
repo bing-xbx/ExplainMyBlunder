@@ -2,6 +2,7 @@
 import { Board } from './board';
 import type { Review } from './review';
 
+export const REVIEW_ID = /^[A-Za-z0-9_-]{1,60}$/;
 const RESULT = new Set([null, '1-0', '0-1', '1/2-1/2']);
 const JUDGEMENT = new Set(['blunder', 'mistake', 'inaccuracy']);
 const square = (s: unknown) => typeof s === 'string' && /^[a-h][1-8]$/.test(s);
@@ -42,7 +43,7 @@ function line(v: unknown): boolean {
 }
 
 export function isSafeReview(v: unknown): v is Review {
-  if (!object(v) || !safeTree(v, { nodes: 0 }) || !text(v.id, 100) || !/^[A-Za-z0-9_-]+$/.test(v.id) ||
+  if (!object(v) || !safeTree(v, { nodes: 0 }) || !text(v.id, 60) || !REVIEW_ID.test(v.id) ||
       !object(v.headers) || !Object.values(v.headers).every((s) => text(s)) ||
       !Array.isArray(v.records) || !v.records.length || v.records.length > 5000 || !v.records.every(record) ||
       !Array.isArray(v.moments) || v.moments.length > v.records.length ||
