@@ -2,9 +2,10 @@
 // backend), a copy of the Stockfish WebAssembly engine, and sw.js (the offline service worker,
 // stamped with a hash of every app file). Cloudflare Pages runs this.
 import { build } from 'esbuild';
+import './build-examples.mjs';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 
@@ -29,11 +30,21 @@ const FILES = [
 const template = readFileSync('src/sw.js', 'utf8');
 const hash = createHash('sha256').update(template);
 for (const f of FILES) hash.update(f).update(readFileSync(join('../web', f === '/' ? 'index.html' : f.slice(1))));
+// Discovery pages affect the source version without making the PWA download their images.
+function hashExamples(dir) {
+  for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a,b) => a.name.localeCompare(b.name))) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) hashExamples(path);
+    else hash.update(path).update(readFileSync(path));
+  }
+}
+hashExamples('../web/examples');
+for (const name of ['sitemap.xml', 'robots.txt']) hash.update(name).update(readFileSync('../web/' + name));
 const version = hash.digest('hex').slice(0, 12);
 // About shows when the app last changed: the last commit touching what the build reads, so a push
 // that changes only docs keeps the same stamp (and the same sw.js: no needless update on phones).
 // Builds without Git history can supply the version timestamp through APP_COMMIT.
-const APP_PATHS = ['web', 'core/src', 'core/tools', 'core/package.json', 'core/package-lock.json'];
+const APP_PATHS = ['web', 'core/src', 'core/examples', 'core/tools', 'core/package.json', 'core/package-lock.json'];
 function built() {
   if (process.env.APP_COMMIT) return JSON.parse(process.env.APP_COMMIT);
   const git = (...a) => execFileSync('git', a, { cwd: '..', encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();

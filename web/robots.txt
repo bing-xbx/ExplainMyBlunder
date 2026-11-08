@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://explainmyblunder.pages.dev/sitemap.xml

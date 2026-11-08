@@ -33,4 +33,5 @@ jobs:
       - run: node test/ui/plus.mjs
       - run: node test/ui/account.mjs
       - run: node test/ui/security.mjs
+      - run: node test/ui/examples.mjs
       - run: node test/ui/monkey.mjs --seed 1 --actions 60 --screens desktop,phone

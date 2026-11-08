@@ -4,6 +4,12 @@
 
 Understand mistakes in your chess games, and see better moves on the board.
 
+**[Try three instant examples](https://explainmyblunder.pages.dev/examples/)** · [Review your own game](https://explainmyblunder.pages.dev/)
+
+[![Two boards comparing a queen capture that loses to checkmate with a safer move](web/examples/the-queen-is-not-free/preview.png)](https://explainmyblunder.pages.dev/examples/the-queen-is-not-free/)
+
+Step through both lines. No account, game upload, or analysis wait is needed for the examples.
+
 Stockfish finds the moment; code finds the concrete reason: a piece left hanging, a threat you ignored, a fork or a pin, a trapped piece, a mate. Every explained moment shows two lines side by side, what you played and the best move, each run until the position is quiet, so you see the material you lost, and the gain you missed.
 
 Everything runs on your device: Stockfish 19 lite in WebAssembly, the explanations, and your reviews (stored in the browser). There is no account and no server. Fetch your recent games from Lichess or chess.com, or paste a PGN.
@@ -51,6 +57,12 @@ Automated checks run on every branch push and pull request. The test suite inclu
 From `core/`, run `npm test`, `npm run typecheck`, then `npm run build`. With Chrome or Edge installed, run `npm run test:security`, `npm run test:account`, `npm run test:update` and `npm run test:plus`. The CI also runs a repeatable UI interaction test on desktop and phone. All test accounts and services are simulated; no paid account or service credentials are required.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow and complete check commands.
+
+## Example pages
+
+The three examples in `web/examples/` are precomputed from famous-game fixtures. Run `npm run build` in core/ to validate every move and endpoint and regenerate their static pages and positions. The editable selection and explanations live in `core/examples/catalog.json`.
+
+With Chrome installed, `npm run test:examples` checks desktop and phone interactions, static fallback, discovery headers and links. To refresh the real board preview images, run `node test/ui/examples.mjs --screenshots` after building, then rebuild so the version includes the new images.
 
 ## Layout
 

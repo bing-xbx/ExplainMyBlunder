@@ -21,3 +21,11 @@
 /pay.html
   ! Cross-Origin-Opener-Policy
   ! Cross-Origin-Embedder-Policy
+
+# Public teaching pages are discoverable; account and app routes retain noindex.
+/examples/*
+  ! X-Robots-Tag
+/sitemap.xml
+  ! X-Robots-Tag
+/robots.txt
+  ! X-Robots-Tag

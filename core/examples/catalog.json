@@ -1,0 +1,149 @@
+[
+  {
+    "slug": "missed-winning-chance",
+    "game": "lasker-thomas-1912",
+    "ply": 18,
+    "title": "Why is this a mistake if I lost nothing?",
+    "description": "A missed chance can matter as much as a lost piece. Compare two continuations from Lasker–Thomas.",
+    "summary": "Black played 9…Bb7. Nothing is captured, but Black misses a chance to win a pawn. Material stays equal in the Bb7 continuation, while Bxe5 leads to a one-pawn advantage.",
+    "a": "Material stays equal",
+    "b": "Black finishes a pawn ahead",
+    "detail": "After Bxe5 dxe5, Nc6 attacks the pawn on e5. In the recorded continuation Black takes that pawn, then exchanges the knight for the bishop on d3. The result is one extra pawn for Black.",
+    "expected": [
+      [
+        32,
+        32
+      ],
+      [
+        28,
+        29
+      ]
+    ],
+    "mate": [
+      false,
+      false
+    ],
+    "fen": "rnbq1rk1/p1pp2pp/1p2pb2/4N3/3PN3/3B4/PPP2PPP/R2QK2R b KQ - 3 9",
+    "players": "Edward Lasker – George Alan Thomas",
+    "event": "London",
+    "date": "1912.10.29",
+    "nodes": 1000000,
+    "orientation": "black",
+    "lines": [
+      [
+        "Bb7",
+        "O-O",
+        "Nc6",
+        "f4",
+        "Nb4",
+        "Nxf6+",
+        "Qxf6"
+      ],
+      [
+        "Bxe5",
+        "dxe5",
+        "Nc6",
+        "g3",
+        "Nxe5",
+        "f4",
+        "Nxd3+",
+        "Qxd3"
+      ]
+    ]
+  },
+  {
+    "slug": "the-queen-is-not-free",
+    "game": "legal-1750",
+    "ply": 10,
+    "title": "Why can’t I take the free queen?",
+    "description": "Taking a queen can still lose the game. Step through Légal’s mating pattern and the safer alternative.",
+    "summary": "Black can capture the queen on d1, but White has a stronger threat: Bxf7+ followed by Nd5 is checkmate. Taking the knight on e5 instead avoids this mating sequence.",
+    "a": "Queen won, game lost",
+    "b": "The mating sequence is avoided",
+    "detail": "After Bxd1, Bxf7+ drives the king to e7. Nd5 then delivers checkmate. With dxe5, Black removes the knight that helped cover the king’s escape squares. White can take the bishop on g4, but there is no immediate mating finish in this line.",
+    "expected": [
+      [
+        30,
+        37
+      ],
+      [
+        24,
+        23
+      ]
+    ],
+    "mate": [
+      true,
+      false
+    ],
+    "fen": "rn1qkbnr/ppp2p1p/3p2p1/4N3/2B1P1b1/2N5/PPPP1PPP/R1BQK2R b KQkq - 0 5",
+    "players": "Kermur de Legall – Saint Brie",
+    "event": "Legal's mate",
+    "date": "1750.01.01",
+    "nodes": 1000000,
+    "orientation": "black",
+    "lines": [
+      [
+        "Bxd1",
+        "Bxf7+",
+        "Ke7",
+        "Nd5#"
+      ],
+      [
+        "dxe5",
+        "Qxg4",
+        "Nc6",
+        "Qf3",
+        "Qf6",
+        "Qxf6",
+        "Nxf6",
+        "Bb5",
+        "Nd7",
+        "Bxc6",
+        "bxc6"
+      ]
+    ]
+  },
+  {
+    "slug": "the-undefended-pawn",
+    "game": "evergreen-1852",
+    "ply": 22,
+    "title": "Why does this pawn move lose material?",
+    "description": "Compare b5 and d5 in the Evergreen Game: an undefended pawn versus a central exchange.",
+    "summary": "Black played 11…b5, attacking the bishop on c4. But the bishop can simply take the pawn. With d5 instead, the central pawn exchange keeps the material balance unchanged.",
+    "a": "Black gives up a pawn",
+    "b": "Both sides exchange a pawn",
+    "detail": "After b5, Bxb5 wins the pawn with no immediate recapture. After d5, White captures en passant with exd6, and Black recaptures with cxd6. Each side loses one pawn, preserving the starting material difference.",
+    "expected": [
+      [
+        37,
+        38
+      ],
+      [
+        36,
+        38
+      ]
+    ],
+    "mate": [
+      false,
+      false
+    ],
+    "fen": "r1b1k2r/ppppnppp/2n3q1/b3P3/2B5/BQPp1N2/P4PPP/RN2R1K1 b kq - 4 11",
+    "players": "Adolf Anderssen – Jean Dufresne",
+    "event": "The Evergreen Game",
+    "date": "1852.01.01",
+    "nodes": 1000000,
+    "orientation": "black",
+    "lines": [
+      [
+        "b5",
+        "Bxb5"
+      ],
+      [
+        "d5",
+        "exd6",
+        "cxd6",
+        "Re3"
+      ]
+    ]
+  }
+]
