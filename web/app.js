@@ -249,7 +249,13 @@ function sideOf(headers, user) {
   return null;
 }
 
-function setGame(records, headers, review = null) {
+function setGame(records, headers, review = null, example = null) {
+  $('example-guide').hidden = !example;
+  if (!example && new URLSearchParams(location.search).has('example')) {
+    const url = new URL(location.href);
+    url.searchParams.delete('example');
+    history.replaceState(null, '', url);
+  }
   state.headers = headers || {};
   state.review = review;
   $('review-guide').hidden = !review;
@@ -260,6 +266,29 @@ function setGame(records, headers, review = null) {
   resetChat();
   renderMoments();
   show(state.root); // always start from the first move, like Lichess
+}
+
+// Public examples use the same review renderer as a player's game. They are
+// held in memory: opening a demo never imports or replaces a saved review.
+async function openExample(slug) {
+  const response = await fetch('/examples/catalog.json');
+  if (!response.ok) throw new Error('The example list could not load.');
+  const examples = await response.json();
+  const example = examples.find((item) => item.slug === slug);
+  if (!example || !/^[a-z0-9-]+$/.test(example.slug)) throw new Error('That example was not found.');
+  const result = await fetch('/examples/' + example.slug + '/review.json');
+  if (!result.ok) throw new Error('The example review could not load.');
+  const review = await result.json();
+  const core = backend.local || await import('/core.js');
+  if (!core.isSafeReview(review) || !review.moments.some((m) => m.index === example.ply && m.card)) {
+    throw new Error('This example review is not valid.');
+  }
+  setGame(review.records, review.headers, review, example);
+  $('example-title').textContent = example.title;
+  $('example-instructions').textContent = example.guide;
+  $('account-setup').open = false;
+  $('paste-game').open = false;
+  show(mainline()[example.ply]);
 }
 
 // A pasted Lichess or chess.com link becomes the game's PGN; anything else is used as pasted.
@@ -468,6 +497,15 @@ async function init() {
   $('inaccuracies-label').hidden = !backend.local; // a compatible local API may only explain blunders and mistakes
   showVersion();
   const reviews = await refreshReviews();
+  const exampleSlug = new URLSearchParams(location.search).get('example');
+  if (exampleSlug !== null) {
+    try { await openExample(exampleSlug); }
+    catch (e) {
+      await load('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+      showError(e.message);
+    }
+    return;
+  }
   // On a machine set up for one player, open their latest reviewed game straight away.
   const names = [cfg.lichess_user, cfg.chesscom_user].filter(Boolean).map((n) => n.toLowerCase());
   const mine = names.length && reviews.filter((r) => [r.white, r.black].some((n) => names.includes((n || '').toLowerCase())));
@@ -1055,7 +1093,7 @@ function openCompare(node) {
   $('board').hidden = true;
   $('compare').hidden = false;
   for (const [mini, rec] of [[miniA, endOf(c.lineA)], [miniB, endOf(c.lineB)]]) {
-    mini.set({ fen: rec.fen, orientation: orientation(), lastMove: rec.lastMove || undefined, check: rec.check });
+    mini.set({ fen: rec.fen, orientation: orientation(), turnColor: rec.turn, lastMove: rec.lastMove || undefined, check: rec.check });
     mini.redrawAll();
   }
   const sign = (x) => (x > 0 ? '+' : '') + x;

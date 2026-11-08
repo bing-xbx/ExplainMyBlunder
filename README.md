@@ -4,11 +4,11 @@
 
 Understand mistakes in your chess games, and see better moves on the board.
 
-**[Try three instant examples](https://explainmyblunder.pages.dev/examples/)** · [Review your own game](https://explainmyblunder.pages.dev/)
+**[Try the app with an example game](https://explainmyblunder.pages.dev/examples/)** · [Review your own game](https://explainmyblunder.pages.dev/)
 
-[![Two boards comparing a queen capture that loses to checkmate with a safer move](web/examples/the-queen-is-not-free/preview.png)](https://explainmyblunder.pages.dev/examples/the-queen-is-not-free/)
+[![ExplainMyBlunder showing a real annotated game review](web/examples/the-undefended-pawn/preview.png)](https://explainmyblunder.pages.dev/?example=the-undefended-pawn)
 
-Step through both lines. No account, game upload, or analysis wait is needed for the examples.
+The examples open precomputed public games inside the actual app. Follow annotated moves, use Compare, or drag a piece with “Explain moves I try” on. The review opens without full-game analysis; analyzing a new move uses Stockfish on your device.
 
 Stockfish finds the moment; code finds the concrete reason: a piece left hanging, a threat you ignored, a fork or a pin, a trapped piece, a mate. Every explained moment shows two lines side by side, what you played and the best move, each run until the position is quiet, so you see the material you lost, and the gain you missed.
 
@@ -60,9 +60,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow and complet
 
 ## Example pages
 
-The three examples in `web/examples/` are precomputed from famous-game fixtures. Run `npm run build` in core/ to validate every move and endpoint and regenerate their static pages and positions. The editable selection and explanations live in `core/examples/catalog.json`.
+The three examples in `web/examples/` are precomputed from famous-game fixtures. Run `npm run build` in core/ to validate every move and endpoint and regenerate their walkthrough pages and review data. The editable selection and walkthrough instructions live in `core/examples/catalog.json`.
 
-With Chrome installed, `npm run test:examples` checks desktop and phone interactions, static fallback, discovery headers and links. To refresh the real board preview images, run `node test/ui/examples.mjs --screenshots` after building, then rebuild so the version includes the new images.
+With Chrome installed, `npm run test:examples` checks real in-app loading, annotations, Compare, move exploration, and preservation of saved reviews on desktop and phone. To refresh the real board preview images, run `node test/ui/examples.mjs --screenshots` after building, then rebuild so the version includes the new images.
 
 ## Layout
 

@@ -3,12 +3,8 @@
     "slug": "missed-winning-chance",
     "game": "lasker-thomas-1912",
     "ply": 18,
-    "title": "Why is this a mistake if I lost nothing?",
-    "description": "A missed chance can matter as much as a lost piece. Compare two continuations from Lasker–Thomas.",
-    "summary": "Black played 9…Bb7. Nothing is captured, but Black misses a chance to win a pawn. Material stays equal in the Bb7 continuation, while Bxe5 leads to a one-pawn advantage.",
-    "a": "Material stays equal",
-    "b": "Black finishes a pawn ahead",
-    "detail": "After Bxe5 dxe5, Nc6 attacks the pawn on e5. In the recorded continuation Black takes that pawn, then exchanges the knight for the bishop on d3. The result is one extra pawn for Black.",
+    "title": "Compare a missed chance",
+    "description": "Open a real review at 9…Bb7 in Lasker–Thomas. Use Compare to see where the played and best lines finish.",
     "expected": [
       [
         32,
@@ -49,18 +45,15 @@
         "Nxd3+",
         "Qxd3"
       ]
-    ]
+    ],
+    "guide": "Press Compare in the explanation, then close it and follow the green Better was line."
   },
   {
     "slug": "the-queen-is-not-free",
     "game": "legal-1750",
     "ply": 10,
-    "title": "Why can’t I take the free queen?",
-    "description": "Taking a queen can still lose the game. Step through Légal’s mating pattern and the safer alternative.",
-    "summary": "Black can capture the queen on d1, but White has a stronger threat: Bxf7+ followed by Nd5 is checkmate. Taking the knight on e5 instead avoids this mating sequence.",
-    "a": "Queen won, game lost",
-    "b": "The mating sequence is avoided",
-    "detail": "After Bxd1, Bxf7+ drives the king to e7. Nd5 then delivers checkmate. With dxe5, Black removes the knight that helped cover the king’s escape squares. White can take the bishop on g4, but there is no immediate mating finish in this line.",
+    "title": "Try your own move",
+    "description": "Open Légal’s game at 5…Bxd1. Go back one move and drag a piece to explore a different choice.",
     "expected": [
       [
         30,
@@ -101,18 +94,15 @@
         "Bxc6",
         "bxc6"
       ]
-    ]
+    ],
+    "guide": "Press ◀ once to return before Bxd1. With “Explain moves I try” checked, drag the knight from b8 to c6. The app will analyze your move."
   },
   {
     "slug": "the-undefended-pawn",
     "game": "evergreen-1852",
     "ply": 22,
-    "title": "Why does this pawn move lose material?",
-    "description": "Compare b5 and d5 in the Evergreen Game: an undefended pawn versus a central exchange.",
-    "summary": "Black played 11…b5, attacking the bishop on c4. But the bishop can simply take the pawn. With d5 instead, the central pawn exchange keeps the material balance unchanged.",
-    "a": "Black gives up a pawn",
-    "b": "Both sides exchange a pawn",
-    "detail": "After b5, Bxb5 wins the pawn with no immediate recapture. After d5, White captures en passant with exd6, and Black recaptures with cxd6. Each side loses one pawn, preserving the starting material difference.",
+    "title": "Follow an annotated mistake",
+    "description": "Open the Evergreen Game at 11…b5. Follow the played line to see the app’s arrows, labels, and move captions.",
     "expected": [
       [
         37,
@@ -144,6 +134,7 @@
         "cxd6",
         "Re3"
       ]
-    ]
+    ],
+    "guide": "The pawn on b5 is marked on the board. Click Bxb5 in “After your move, best play” to see the capture, then follow the green Better was line."
   }
 ]

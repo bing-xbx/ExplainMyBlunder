@@ -2,3 +2,4 @@
 export { localApi, importReviews, REVIEW_NODES, coachEvaluator } from './local';
 export { runCoachTool } from './coach-tools';
 export { parseGameLink, pgnFromLink, looksLikeUrl } from './links';
+export { isSafeReview } from './review-input';

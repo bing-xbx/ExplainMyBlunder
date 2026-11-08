@@ -11,7 +11,7 @@
   <meta property="og:description" content="Compare your move with a better continuation. Free chess explanations that run on your device.">
   <meta property="og:url" content="https://explainmyblunder.pages.dev/">
   <meta property="og:image" content="https://explainmyblunder.pages.dev/examples/the-queen-is-not-free/preview.png">
-  <meta property="og:image:alt" content="Two chess boards showing why taking a queen loses to checkmate">
+  <meta property="og:image:alt" content="The ExplainMyBlunder app showing an annotated review">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/icon-192.png">
   <link rel="manifest" href="/manifest.webmanifest">
@@ -80,7 +80,7 @@
             </section>
             <section class="set-sec">
               <h3>About</h3>
-              <p><a href="/examples/">Try three instant examples</a></p>
+              <p><a href="/examples/">Try the app with an example game</a></p>
               <p class="muted acc-help">ExplainMyBlunder <a id="about-source" target="_blank" rel="noopener"><span id="about-version"></span></a>.</p>
               <p class="set-links"><a id="about-star" target="_blank" rel="noopener" hidden>★ Star it on GitHub</a></p>
             </section>
@@ -126,6 +126,12 @@
     </div>
   </header>
 
+  <section id="example-guide" hidden aria-label="Example walkthrough">
+    <strong id="example-title"></strong>
+    <p id="example-instructions"></p>
+    <span class="muted">Public game · one explained moment · your saved games are unchanged.</span>
+    <a href="/examples/">Other examples</a> · <a href="/">Review your game</a>
+  </section>
   <main>
     <div id="evalbar" title="Stockfish evaluation"><div id="evalfill"></div><span id="evaltext"></span></div>
     <div id="board-col">

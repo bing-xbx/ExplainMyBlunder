@@ -66,6 +66,9 @@ main { display: flex; gap: 14px; padding: 14px 20px; align-items: flex-start; }
 #board-wrap.var-best { outline-color: var(--best); }
 #board-wrap.var-user { outline-color: var(--user); }
 #board { width: var(--board); height: var(--board); }
+/* Keep file coordinates inside the board, including on narrow screens. */
+.cg-wrap coords.files { left: 0; }
+.cg-wrap coords.files coord { text-align: right; padding-right: 4px; }
 
 #caption { width: var(--board); min-height: 40px; margin-top: 8px; padding: 8px 10px; background: var(--panel); border-left: 3px solid var(--accent); border-radius: 3px; font-size: calc(15px * var(--text-scale)); }
 #nav { display: flex; gap: 6px; margin-top: 8px; align-items: center; width: var(--board); flex-wrap: wrap; }
@@ -416,3 +419,9 @@ button:disabled { opacity: .6; cursor: default; }
 
 #about-source[href] { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 #about-source[href]:hover { color: var(--text); }
+
+/* Guidance for a public example; the board and review UI are unchanged. */
+#example-guide { margin: 8px auto 16px; padding: 12px 16px; max-width: 1200px; border: 1px solid #63785b; border-radius: 8px; background: #273225; }
+#example-guide p { margin: 5px 0; }
+#example-guide a { color: #c6e7ac; margin-left: 8px; }
+#example-guide .muted { font-size: 13px; }
