@@ -3,6 +3,7 @@
 // Variations show the continuation after the played move and the suggested alternative.
 import { Chessground } from '/vendor/chessground/chessground.min.js';
 import * as account from '/account.js';
+import { paidAnalyticsEnabled, trackPaidInteraction } from '/paid-analytics.js';
 
 
 const GLYPH = { blunder: '??', mistake: '?', inaccuracy: '?!' };
@@ -58,6 +59,7 @@ const DEFAULT_BRUSHES = {
 };
 
 const $ = (id) => document.getElementById(id);
+$('paid-analytics-notice').hidden = !paidAnalyticsEnabled();
 const escapeHtml = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 // Card text, escaped, with the core's **feature terms** in bold.
 const rich = (s) => escapeHtml(s).replace(/\*\*(.+?)\*\*/g, '<b class="feat">$1</b>');
@@ -894,7 +896,7 @@ function commentFor(node) {
     ai.className = 'small ai-btn';
     ai.textContent = '✦ Explain this with AI';
     ai.title = 'Ask the coach about this move (one coach question)';
-    ai.onclick = (e) => { e.stopPropagation(); explainWithAi(node); };
+    ai.onclick = (e) => { e.stopPropagation(); trackPaidInteraction('explain_ai_click'); explainWithAi(node); };
     actions.appendChild(ai);
   }
   c.appendChild(actions);
@@ -1404,9 +1406,10 @@ async function askCoach(history, context) {
   }
 }
 
-async function sendChat(text) {
+async function sendChat(text, source = 'chat') {
   text = (text || '').trim();
   if (!text || chat.busy) return;
+  if (source === 'chat') trackPaidInteraction('coach_chat_submit');
   if (freePlan() || (coachMode() && !account.paid())) { answerFreePlan(text); return; }
   chat.busy = true;
   addMsg('user', text, { where: $('context').innerText });
@@ -1437,7 +1440,7 @@ function explainWithAi(node) {
   const m = node.moment;
   const what = JUDGE[m.judgement];
   sendChat(what ? `Explain ${m.san} simply: why is it a ${what.toLowerCase()}, and what was better?`
-    : `Explain ${m.san} simply: what does it do, and was there something better?`);
+    : `Explain ${m.san} simply: what does it do, and was there something better?`, 'card');
 }
 
 // ---------- the account (only with a backend in config.json) ----------

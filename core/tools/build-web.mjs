@@ -21,7 +21,7 @@ copyFileSync(join(sfDir, '..', 'Copying.txt'), join(out, 'Copying.txt'));
 
 // The service worker: every file the app needs offline, and a version that changes whenever one does.
 const FILES = [
-  '/', '/app.js', '/account.js', '/core.js', '/style.css', '/config.json', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png',
+  '/', '/app.js', '/account.js', '/paid-analytics.js', '/core.js', '/style.css', '/config.json', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png',
   '/vendor/chessground/chessground.min.js', '/vendor/chessground/chessground.base.css',
   '/vendor/chessground/chessground.brown.css', '/vendor/chessground/chessground.cburnett.css',
   '/vendor/stockfish/stockfish-19-lite-single.js', '/vendor/stockfish/stockfish-19-lite-single.wasm',
